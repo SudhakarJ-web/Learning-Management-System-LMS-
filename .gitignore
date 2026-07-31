@@ -1,22 +1,15 @@
-# WordPress Core Files (Never track these)
-wp-admin/
-wp-includes/
-wp-content/plugins/
-wp-content/themes/
-!wp-content/plugins/sabinmathew-lms/  # Force Git to track ONLY your plugin folder
-
-# Configuration and Secrets (CRITICAL)
-wp-config.php
-.env
-*.log
-
-# Uploads and Database Backups
-wp-content/uploads/
-wp-content/blogs.dir/
-*.sql
-*.sqlite
-
-# Local OS Files
+# Ignore local system overhead
 .DS_Store
 Thumbs.db
+.idea/
 .vscode/
+*.log
+
+# Ignore raw frontend tooling configurations if you use any later (like node_modules)
+node_modules/
+
+# Ensure all your subdirectories are forcefully tracked
+!includes/
+!admin/
+!public/
+!templates/
