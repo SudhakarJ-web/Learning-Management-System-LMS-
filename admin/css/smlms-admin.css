@@ -1,0 +1,66 @@
+/* Top Header Admin Navigation Bar */
+.smlms-admin-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    border-bottom: 1px solid #c3c4c7;
+    padding: 10px 20px;
+    margin-left: -20px;
+    margin-right: -20px;
+    margin-bottom: 20px;
+}
+
+.smlms-back-button {
+    text-decoration: none;
+    color: #2271b1;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.smlms-back-button:hover {
+    color: #135e96;
+}
+
+.smlms-header-tabs {
+    display: flex;
+    gap: 25px;
+}
+
+.smlms-tab {
+    text-decoration: none;
+    color: #50575e;
+    font-weight: 600;
+    font-size: 14px;
+    padding-bottom: 12px;
+    margin-bottom: -11px;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease-in-out;
+}
+
+.smlms-tab:hover {
+    color: #2271b1;
+}
+
+.smlms-tab.active {
+    color: #2271b1;
+    border-bottom-color: #2271b1;
+}
+
+.smlms-add-new-btn {
+    background-color: #2271b1 !important;
+    border-color: #2271b1 !important;
+    font-weight: 600 !important;
+    border-radius: 4px !important;
+}
+
+/* Custom CPT Meta Box Polish */
+#smlms_topic_settings .inside {
+    padding: 15px;
+}
+
+#smlms_topic_settings label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
