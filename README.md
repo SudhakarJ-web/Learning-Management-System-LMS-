@@ -11,10 +11,10 @@ A modern, production-ready Learning Management System designed to handle online 
 
 ## 🛠️ Technology Stack
 
-* **Frontend**: *[Insert e.g., React.js / Vue.js / HTML5 & Tailwind CSS]*
-* **Backend**: *[Insert e.g., Node.js Express / Python Django / PHP Laravel]*
-* **Database**: *[Insert e.g., PostgreSQL / MongoDB / MySQL]*
-* **Authentication**: *[Insert e.g., JWT / Firebase Auth / Auth0]*
+* **Frontend**: *HTML5, JavaScript (ES6+), Custom CSS / Tailwind CSS*
+* **Backend**: *PHP 8.x (WordPress API Architecture)*
+* **Database**: *MySQL / MariaDB (WP Custom Post Types + Custom MySQL Tables)*
+* **Authentication**: *WordPress Native Auth System & WP REST API Nonces*
 
 ## ⚙️ Quick Installation
 
