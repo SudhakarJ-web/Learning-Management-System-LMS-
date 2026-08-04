@@ -1,66 +1,209 @@
-/* Top Header Admin Navigation Bar */
-.smlms-admin-header-bar {
+/* --- Builder Stage Container --- */
+.smlms-builder-container {
+    background: #ffffff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+    margin-top: 10px;
+}
+
+.smlms-builder-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #fff;
-    border-bottom: 1px solid #c3c4c7;
-    padding: 10px 20px;
-    margin-left: -20px;
-    margin-right: -20px;
-    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 16px;
 }
 
-.smlms-back-button {
+.smlms-steps-count {
+    font-weight: 600;
+    color: #334155;
+    font-size: 14px;
+}
+
+.smlms-toggle-all {
+    color: #0284c7;
     text-decoration: none;
-    color: #2271b1;
     font-weight: 600;
     font-size: 13px;
 }
 
-.smlms-back-button:hover {
-    color: #135e96;
+/* --- LearnDash Badge Replicas --- */
+.smlms-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 12px;
+    margin-right: 12px;
+    flex-shrink: 0;
 }
 
-.smlms-header-tabs {
+.smlms-badge-lesson {
+    background-color: #22c55e; /* LearnDash Green */
+}
+
+.smlms-badge-topic {
+    background-color: #0284c7; /* LearnDash Blue/Teal */
+}
+
+/* --- Builder Canvas Rows --- */
+.smlms-builder-lesson-row {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.smlms-builder-lesson-row.smlms-active-lesson-row {
+    border: 2px solid #0284c7 !important;
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.15);
+}
+
+.smlms-builder-row-header {
     display: flex;
-    gap: 25px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    background: #f8fafc;
+    cursor: pointer;
+    user-select: none;
 }
 
-.smlms-tab {
-    text-decoration: none;
-    color: #50575e;
-    font-weight: 600;
+.smlms-builder-lesson-row.smlms-active-lesson-row .smlms-builder-row-header {
+    background-color: #f0f9ff !important;
+}
+
+.smlms-row-left, .smlms-row-right {
+    display: flex;
+    align-items: center;
+}
+
+.smlms-drag-handle {
+    color: #94a3b8;
+    margin-right: 12px;
+    cursor: grab;
+    font-size: 16px;
+    letter-spacing: -2px;
+}
+
+.smlms-step-title {
     font-size: 14px;
-    padding-bottom: 12px;
-    margin-bottom: -11px;
-    border-bottom: 3px solid transparent;
-    transition: all 0.2s ease-in-out;
+    color: #0f172a;
 }
 
-.smlms-tab:hover {
-    color: #2271b1;
+.smlms-sub-count {
+    color: #64748b;
+    font-size: 13px;
+    margin-left: 6px;
 }
 
-.smlms-tab.active {
-    color: #2271b1;
-    border-bottom-color: #2271b1;
+.smlms-remove-step {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 8px;
+    transition: color 0.2s;
 }
 
-.smlms-add-new-btn {
-    background-color: #2271b1 !important;
-    border-color: #2271b1 !important;
-    font-weight: 600 !important;
+.smlms-remove-step:hover {
+    color: #ef4444;
+}
+
+.smlms-accordion-arrow {
+    color: #0284c7;
+    font-size: 12px;
+    margin-left: 10px;
+    transition: transform 0.2s;
+}
+
+.smlms-accordion-arrow.smlms-arrow-up {
+    transform: rotate(180deg);
+}
+
+/* --- Nested Topics Tree --- */
+.smlms-builder-topics-body {
+    padding: 12px 18px 12px 48px;
+    background: #ffffff;
+    border-top: 1px solid #f1f5f9;
+}
+
+.smlms-builder-topic-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+.smlms-builder-topic-row:last-child {
+    margin-bottom: 0;
+}
+
+/* --- Sidebar Pickers --- */
+.smlms-sidebar-picker-box {
+    background: #ffffff;
+}
+
+.smlms-picker-search {
+    margin-bottom: 10px !important;
     border-radius: 4px !important;
+    border: 1px solid #c3c4c7 !important;
 }
 
-/* Custom CPT Meta Box Polish */
-#smlms_topic_settings .inside {
-    padding: 15px;
+.smlms-picker-items {
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid #dcdcde;
+    padding: 8px;
+    border-radius: 4px;
+    background: #f8fafc;
+    margin-bottom: 12px;
 }
 
-#smlms_topic_settings label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 5px;
+.smlms-picker-row {
+    display: flex;
+    align-items: center;
+    padding: 6px 4px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.smlms-picker-row:hover {
+    background: #e2e8f0;
+}
+
+.smlms-picker-cb {
+    margin-right: 10px !important;
+}
+
+.smlms-item-title {
+    color: #1e293b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.smlms-picker-footer button {
+    width: 100%;
+}
+
+.smlms-builder-empty-notice, .smlms-no-topics-notice {
+    color: #64748b;
+    font-size: 13px;
+    padding: 10px 0;
 }

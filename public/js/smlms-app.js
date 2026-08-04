@@ -1,21 +1,28 @@
-document.addEventListener('DOMContentLoaded', () => {
-    let currentWatchedSeconds = 0;
-    let totalVideoDuration = 0;
+jQuery(document).ready(function($) {
 
-    // 1. Tab Switching Logic
-    const tabButtons = document.querySelectorAll('.smlms-tab-btn');
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.smlms-tab-pane').forEach(pane => pane.classList.remove('active'));
-
-            button.classList.add('active');
-            const targetPane = document.querySelector(button.dataset.target);
-            if (targetPane) targetPane.classList.add('active');
-        });
+    // 1. Left Sidebar Toggle
+    $('#smlms-sidebar-toggle').on('click', function() {
+        $('#smlms-focus-sidebar').toggleClass('collapsed');
     });
 
-    // 2. Animate Anti-Piracy Watermark across screen
+    // 2. Sidebar Accordion Expand/Collapse
+    $(document).on('click', '.smlms-expand-btn', function(e) {
+        e.preventDefault();
+        const wrapper = $(this).closest('.smlms-lesson-item').find('.smlms-topic-list-wrapper');
+        wrapper.slideToggle(150);
+        $(this).toggleClass('expanded');
+    });
+
+    // 3. Stage Tabs Switcher (Topic vs Materials)
+    $('.smlms-stage-tab-btn').on('click', function() {
+        $('.smlms-stage-tab-btn').removeClass('active');
+        $('.smlms-stage-tab-pane').removeClass('active');
+
+        $(this).addClass('active');
+        $($(this).data('target')).addClass('active');
+    });
+
+    // 4. Animate Anti-Piracy Watermark
     const watermark = document.getElementById('smlms-watermark');
     if (watermark) {
         setInterval(() => {
@@ -23,19 +30,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const left = Math.floor(Math.random() * 70) + 10;
             watermark.style.top = `${top}%`;
             watermark.style.left = `${left}%`;
-        }, 12000);
+        }, 10000);
     }
 
-    // 3. Telemetry Pulse to REST API
+    // 5. Telemetry Pulse to REST API
     setInterval(async () => {
-        const topicLink = document.querySelector('.smlms-topic-active .smlms-topic-link');
-        if (!topicLink) return;
-
-        const topicId = topicLink.dataset.topicId;
-        currentWatchedSeconds += 5; // Simulating local playback timer
+        const topicId = smlmsSettings.current_id;
+        if (!topicId) return;
 
         try {
-            const response = await fetch('/wp-json/smlms/v1/progress/heartbeat', {
+            const response = await fetch(`${smlmsSettings.root}progress/heartbeat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -43,18 +47,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify({
                     topic_id: topicId,
-                    watched_seconds: currentWatchedSeconds,
-                    total_duration: 300 // Set dynamically or via player API
+                    watched_seconds: 5,
+                    total_duration: 300
                 })
             });
 
-            const result = await response.json();
-            if (result.can_complete) {
-                const completeBtn = document.getElementById('smlms-mark-complete-btn');
-                if (completeBtn) completeBtn.removeAttribute('disabled');
+            const res = await response.json();
+            if (res.can_complete) {
+                $('#smlms-mark-complete-btn').removeAttr('disabled');
             }
-        } catch (err) {
-            console.error('Telemetry error:', err);
+        } catch(e) {
+            console.error('Telemetry error:', e);
         }
     }, 5000);
 });
