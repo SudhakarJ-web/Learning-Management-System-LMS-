@@ -1,10 +1,16 @@
 <?php
-if (!defined('ABSPATH')) exit;
+/**
+ * Database & Hierarchy Query Service
+ */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 class SMLMS_DB {
 
     /**
-     * Fast single-query SQL JOIN for User Dashboard rendering (< 10ms execution time).
+     * Fast SQL JOIN for User Dashboard
      */
     public static function smlms_get_user_dashboard_fast($user_id) {
         global $wpdb;
@@ -27,7 +33,7 @@ class SMLMS_DB {
     }
 
     /**
-     * Upserts telemetry progress for a specific topic.
+     * Saves or updates topic completion telemetry
      */
     public static function save_topic_progress($user_id, $topic_id, $watched_seconds, $is_completed) {
         global $wpdb;
@@ -48,61 +54,165 @@ class SMLMS_DB {
     }
 
     /**
-     * Checks if a user is actively enrolled in a course.
+     * Enrollment Status Checker
      */
     public static function is_user_enrolled($user_id, $course_id) {
         global $wpdb;
-
         $sql = "SELECT id FROM {$wpdb->prefix}smlms_enrollments WHERE user_id = %d AND course_id = %d AND status = 'active' LIMIT 1";
         return (bool) $wpdb->get_var($wpdb->prepare($sql, $user_id, $course_id));
     }
 
     /**
-     * Retrieves lesson & topic hierarchy with completion status for a given course.
+     * Resolves the Root Course ID from any Lesson or Topic ID
      */
-    public static function get_course_hierarchy($course_id, $user_id) {
+    public static function get_parent_course_id($post_id) {
+        $post_type = get_post_type($post_id);
+
+        if ($post_type === 'smlms_course') {
+            return $post_id;
+        }
+
+        if ($post_type === 'smlms_topic') {
+            $lesson_id = get_post_meta($post_id, '_smlms_parent_lesson_id', true);
+            if ($lesson_id) {
+                $course_id = get_post_meta($lesson_id, '_smlms_parent_course_id', true);
+                if ($course_id) return intval($course_id);
+            }
+        }
+
+        if ($post_type === 'smlms_lesson') {
+            $course_id = get_post_meta($post_id, '_smlms_parent_course_id', true);
+            if ($course_id) return intval($course_id);
+        }
+
+        // Fallback: Check Builder JSON across all published courses
+        $courses = get_posts(['post_type' => 'smlms_course', 'posts_per_page' => -1, 'fields' => 'ids']);
+        foreach ($courses as $c_id) {
+            $raw_tree = get_post_meta($c_id, '_smlms_course_tree_json', true);
+            if (!empty($raw_tree)) {
+                $tree = json_decode($raw_tree, true);
+                if (is_array($tree)) {
+                    foreach ($tree as $l_node) {
+                        if ($l_node['id'] == $post_id) return $c_id;
+                        if (!empty($l_node['topics'])) {
+                            foreach ($l_node['topics'] as $t_node) {
+                                if ($t_node['id'] == $post_id) return $c_id;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    /**
+     * Fetches Complete Course Hierarchy (Lessons, Topics, Durations, Types, Progress)
+     */
+    public static function get_course_hierarchy($course_id, $user_id = 0) {
         global $wpdb;
 
-        $lessons = get_posts([
-            'post_type'      => 'smlms_lesson',
-            'posts_per_page' => -1,
-            'meta_key'       => '_smlms_parent_course_id',
-            'meta_value'     => $course_id,
-            'orderby'        => 'menu_order',
-            'order'          => 'ASC'
-        ]);
+        if (!$course_id) {
+            return [];
+        }
+
+        // Check if structure exists in Course Builder JSON
+        $raw_tree = get_post_meta($course_id, '_smlms_course_tree_json', true);
+        $builder_tree = !empty($raw_tree) ? json_decode($raw_tree, true) : [];
 
         $hierarchy = [];
 
-        foreach ($lessons as $lesson) {
-            $topics = get_posts([
-                'post_type'      => 'smlms_topic',
+        if (!empty($builder_tree) && is_array($builder_tree)) {
+            foreach ($builder_tree as $lesson_node) {
+                $lesson_id = intval($lesson_node['id']);
+                $lesson_post = get_post($lesson_id);
+                if (!$lesson_post || $lesson_post->post_status !== 'publish') continue;
+
+                $topics_data = [];
+                if (!empty($lesson_node['topics']) && is_array($lesson_node['topics'])) {
+                    foreach ($lesson_node['topics'] as $topic_node) {
+                        $topic_id = intval($topic_node['id']);
+                        $topic_post = get_post($topic_id);
+                        if (!$topic_post || $topic_post->post_status !== 'publish') continue;
+
+                        $prog = null;
+                        if ($user_id) {
+                            $prog = $wpdb->get_row($wpdb->prepare(
+                                "SELECT is_completed, watched_seconds FROM {$wpdb->prefix}smlms_progress WHERE user_id = %d AND topic_id = %d",
+                                $user_id, $topic_id
+                            ));
+                        }
+
+                        $topics_data[] = [
+                            'id'           => $topic_id,
+                            'title'        => $topic_post->post_title,
+                            'permalink'    => get_permalink($topic_id),
+                            'duration'     => get_post_meta($topic_id, '_smlms_duration', true) ?: '0.00',
+                            'content_type' => get_post_meta($topic_id, '_smlms_content_type', true) ?: 'video',
+                            'is_completed' => $prog ? (bool)$prog->is_completed : false,
+                            'watched_sec'  => $prog ? intval($prog->watched_seconds) : 0
+                        ];
+                    }
+                }
+
+                $hierarchy[] = [
+                    'lesson_id'    => $lesson_id,
+                    'lesson_title' => $lesson_post->post_title,
+                    'permalink'    => get_permalink($lesson_id),
+                    'duration'     => get_post_meta($lesson_id, '_smlms_duration', true) ?: '0.00',
+                    'content_type' => get_post_meta($lesson_id, '_smlms_content_type', true) ?: 'video',
+                    'topics'       => $topics_data
+                ];
+            }
+        } else {
+            // Query by parent meta fallback
+            $lessons = get_posts([
+                'post_type'      => 'smlms_lesson',
                 'posts_per_page' => -1,
-                'meta_key'       => '_smlms_parent_lesson_id',
-                'meta_value'     => $lesson->ID,
+                'meta_key'       => '_smlms_parent_course_id',
+                'meta_value'     => $course_id,
                 'orderby'        => 'menu_order',
                 'order'          => 'ASC'
             ]);
 
-            $topic_data = [];
-            foreach ($topics as $topic) {
-                $progress_sql = "SELECT is_completed, watched_seconds FROM {$wpdb->prefix}smlms_progress WHERE user_id = %d AND topic_id = %d";
-                $prog = $wpdb->get_row($wpdb->prepare($progress_sql, $user_id, $topic->ID));
+            foreach ($lessons as $lesson) {
+                $topics = get_posts([
+                    'post_type'      => 'smlms_topic',
+                    'posts_per_page' => -1,
+                    'meta_key'       => '_smlms_parent_lesson_id',
+                    'meta_value'     => $lesson->ID,
+                    'orderby'        => 'menu_order',
+                    'order'          => 'ASC'
+                ]);
 
-                $topic_data[] = [
-                    'id'           => $topic->ID,
-                    'title'        => $topic->post_title,
-                    'permalink'    => get_permalink($topic->ID),
-                    'is_completed' => $prog ? (bool)$prog->is_completed : false,
-                    'watched_sec'  => $prog ? intval($prog->watched_seconds) : 0
+                $topics_data = [];
+                foreach ($topics as $topic) {
+                    $prog = $user_id ? $wpdb->get_row($wpdb->prepare(
+                        "SELECT is_completed, watched_seconds FROM {$wpdb->prefix}smlms_progress WHERE user_id = %d AND topic_id = %d",
+                        $user_id, $topic->ID
+                    )) : null;
+
+                    $topics_data[] = [
+                        'id'           => $topic->ID,
+                        'title'        => $topic->post_title,
+                        'permalink'    => get_permalink($topic->ID),
+                        'duration'     => get_post_meta($topic->ID, '_smlms_duration', true) ?: '0.00',
+                        'content_type' => get_post_meta($topic->ID, '_smlms_content_type', true) ?: 'video',
+                        'is_completed' => $prog ? (bool)$prog->is_completed : false,
+                        'watched_sec'  => $prog ? intval($prog->watched_seconds) : 0
+                    ];
+                }
+
+                $hierarchy[] = [
+                    'lesson_id'    => $lesson->ID,
+                    'lesson_title' => $lesson->post_title,
+                    'permalink'    => get_permalink($lesson->ID),
+                    'duration'     => get_post_meta($lesson->ID, '_smlms_duration', true) ?: '0.00',
+                    'content_type' => get_post_meta($lesson->ID, '_smlms_content_type', true) ?: 'video',
+                    'topics'       => $topics_data
                 ];
             }
-
-            $hierarchy[] = [
-                'lesson_id'    => $lesson->ID,
-                'lesson_title' => $lesson->post_title,
-                'topics'       => $topic_data
-            ];
         }
 
         return $hierarchy;

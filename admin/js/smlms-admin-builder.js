@@ -4,7 +4,7 @@ jQuery(document).ready(function($) {
     let selectedLessonId = null;
     const hiddenJsonField = $('#smlms_course_tree_json');
 
-    // Safe JSON Parsing from stored post meta
+    // Load existing hierarchy JSON
     if (hiddenJsonField.length && hiddenJsonField.val()) {
         try {
             courseTree = JSON.parse(hiddenJsonField.val());
@@ -14,48 +14,54 @@ jQuery(document).ready(function($) {
         }
     }
 
-    // Render Initial State
     renderCanvas();
 
-    // --- 1. Top Header Tab Switcher (Course page vs Builder) ---
+    // 1. Admin Top Tab Switcher
     $(document).on('click', '.smlms-header-tabs .smlms-tab', function(e) {
-        const tabText = $(this).text().trim().toLowerCase();
+        e.preventDefault();
+        const tabType = $(this).data('tab');
 
-        if (tabText === 'builder') {
-            e.preventDefault();
-            $('.smlms-header-tabs .smlms-tab').removeClass('active');
-            $(this).addClass('active');
+        $('.smlms-header-tabs .smlms-tab').removeClass('active');
+        $(this).addClass('active');
 
-            $('#postdivrich').hide(); // Hide WordPress Classic/Block Editor
-            $('#smlms_course_builder_box').show(); // Show Builder Box
-        } else if (tabText === 'course page') {
-            e.preventDefault();
-            $('.smlms-header-tabs .smlms-tab').removeClass('active');
-            $(this).addClass('active');
+        // Hide all panels by default
+        $('#postdivrich').hide();
+        $('#smlms_course_custom_meta_box').hide();
+        $('#smlms_course_builder_box').hide();
+        $('#smlms_sidebar_lessons_box').hide();
+        $('#smlms_sidebar_topics_box').hide();
+        $('#smlms_course_enrollment_box').hide();
+        $('#smlms_course_students_box').hide();
+        $('#smlms_course_settings').hide();
 
+        if (tabType === 'course_page' || tabType === 'lesson_page' || tabType === 'topic_page') {
             $('#postdivrich').show();
+            $('#smlms_course_custom_meta_box').show();
+            $('#smlms_sidebar_lessons_box').show();
+            $('#smlms_sidebar_topics_box').show();
+            $('#smlms_course_settings').show();
+        } else if (tabType === 'builder') {
+            $('#smlms_course_builder_box').show();   // Show Sabin Mathew Builder
+            $('#smlms_sidebar_lessons_box').show();  // Show Lessons Sidebar Picker
+            $('#smlms_sidebar_topics_box').show();   // Show Topics Sidebar Picker
+        } else if (tabType === 'settings') {
+            $('#smlms_course_enrollment_box').show();
+            $('#smlms_course_students_box').show();
+            $('#smlms_course_settings').show();
         }
     });
 
-    // --- 2. Live Search in Sidebar Pickers ---
-    $(document).on('keyup', '.smlms-picker-search', function() {
-        const term = $(this).val().toLowerCase();
-        const pickerBox = $(this).closest('.smlms-sidebar-picker-box');
+    // Automatically trigger current active tab
+    $('.smlms-header-tabs .smlms-tab.active').trigger('click');
 
-        pickerBox.find('.smlms-picker-row').each(function() {
-            const title = $(this).text().toLowerCase();
-            $(this).toggle(title.includes(term));
-        });
-    });
-
-    // --- 3. Add Lessons to Builder ---
+    // 2. Add Lessons to Builder Canvas
     $(document).on('click', '.smlms-add-lessons-btn', function(e) {
         e.preventDefault();
         const pickerBox = $(this).closest('.smlms-sidebar-picker-box');
         const checkedItems = pickerBox.find('.smlms-picker-cb:checked');
 
         if (checkedItems.length === 0) {
-            alert('Please check at least one lesson to add.');
+            alert('Please select at least one lesson from the list.');
             return;
         }
 
@@ -63,7 +69,6 @@ jQuery(document).ready(function($) {
             const lessonId = $(this).val();
             const lessonTitle = $(this).data('title');
 
-            // Add if not already present
             if (!courseTree.some(item => item.id == lessonId)) {
                 courseTree.push({
                     id: lessonId,
@@ -74,15 +79,13 @@ jQuery(document).ready(function($) {
             $(this).prop('checked', false);
         });
 
-        // Set the active lesson target to the newest lesson
         if (courseTree.length > 0) {
             selectedLessonId = courseTree[courseTree.length - 1].id;
         }
-
         syncAndRender();
     });
 
-    // --- 4. Add Topics to Active Lesson ---
+    // 3. Add Topics to Selected Lesson
     $(document).on('click', '.smlms-add-topics-btn', function(e) {
         e.preventDefault();
 
@@ -95,11 +98,10 @@ jQuery(document).ready(function($) {
         const checkedItems = pickerBox.find('.smlms-picker-cb:checked');
 
         if (checkedItems.length === 0) {
-            alert('Please check at least one topic to add.');
+            alert('Please select at least one topic from the list.');
             return;
         }
 
-        // Find selected target lesson or default to the last lesson
         let targetLesson = courseTree.find(l => l.id == selectedLessonId);
         if (!targetLesson) {
             targetLesson = courseTree[courseTree.length - 1];
@@ -122,7 +124,7 @@ jQuery(document).ready(function($) {
         syncAndRender();
     });
 
-    // --- 5. Select Active Lesson Target on Row Click ---
+    // 4. Select Lesson Target on Row Click
     $(document).on('click', '.smlms-builder-lesson-row', function(e) {
         if ($(e.target).hasClass('smlms-remove-step') || $(e.target).hasClass('smlms-accordion-arrow')) return;
 
@@ -131,7 +133,7 @@ jQuery(document).ready(function($) {
         $(this).addClass('smlms-active-lesson-row');
     });
 
-    // --- 6. Delete Lesson / Topic Item ---
+    // 5. Delete Lesson / Topic Step
     $(document).on('click', '.smlms-remove-step', function(e) {
         e.stopPropagation();
         const type = $(this).data('type');
@@ -151,31 +153,37 @@ jQuery(document).ready(function($) {
         syncAndRender();
     });
 
-    // --- 7. Accordion Expand/Collapse ---
+    // 6. Accordion Toggle
     $(document).on('click', '.smlms-accordion-arrow', function(e) {
         e.stopPropagation();
-        const body = $(this).closest('.smlms-builder-lesson-row').find('.smlms-builder-topics-body');
-        body.slideToggle(150);
-        $(this).toggleClass('smlms-arrow-up');
+        $(this).closest('.smlms-builder-lesson-row').find('.smlms-builder-topics-body').slideToggle(150);
     });
 
-    // --- 8. Expand / Collapse All Steps ---
+    // 7. Expand / Collapse All
     $('#smlms-toggle-all-steps').on('click', function(e) {
         e.preventDefault();
         const isExpanded = $(this).data('expanded');
 
         if (isExpanded) {
             $('.smlms-builder-topics-body').slideUp(150);
-            $('.smlms-accordion-arrow').removeClass('smlms-arrow-up');
             $(this).html('Expand All &#9660;').data('expanded', false);
         } else {
             $('.smlms-builder-topics-body').slideDown(150);
-            $('.smlms-accordion-arrow').addClass('smlms-arrow-up');
             $(this).html('Collapse All &#9650;').data('expanded', true);
         }
     });
 
-    // State Synchronization & Rendering
+    // Filter Search in Sidebar Boxes
+    $(document).on('keyup', '.smlms-picker-search', function() {
+        const term = $(this).val().toLowerCase();
+        const pickerBox = $(this).closest('.smlms-sidebar-picker-box');
+
+        pickerBox.find('.smlms-picker-row').each(function() {
+            const title = $(this).text().toLowerCase();
+            $(this).toggle(title.includes(term));
+        });
+    });
+
     function syncAndRender() {
         hiddenJsonField.val(JSON.stringify(courseTree));
         renderCanvas();
@@ -183,10 +191,16 @@ jQuery(document).ready(function($) {
 
     function renderCanvas() {
         const canvas = $('#smlms-builder-canvas');
+        if (!canvas.length) return;
+
         canvas.empty();
 
         if (courseTree.length === 0) {
-            canvas.html('<div class="smlms-builder-empty-notice"><p>No steps in this course yet. Check lessons in the right sidebar and click <strong>Add to Builder</strong>.</p></div>');
+            canvas.html(`
+                <div class="smlms-builder-empty-notice">
+                    <p>No steps in this course yet. Select lessons from the right sidebar and click <strong>Add to Builder</strong>.</p>
+                </div>
+            `);
             $('#smlms-steps-counter').text('0 steps in this Course');
             return;
         }
@@ -205,12 +219,10 @@ jQuery(document).ready(function($) {
                 lesson.topics.forEach((topic, tIndex) => {
                     topicsHtml += `
                         <div class="smlms-builder-topic-row" data-topic-id="${topic.id}">
-                            <div class="smlms-row-left">
-                                <span class="smlms-drag-handle">&#8942;&#8942;</span>
-                                <span class="smlms-badge smlms-badge-topic">T</span>
-                                <span class="smlms-step-title">${lIndex + 1}.${tIndex + 1} ${escapeHtml(topic.title)}</span>
-                            </div>
-                            <button type="button" class="smlms-remove-step" data-type="topic" data-id="${topic.id}" data-parent-id="${lesson.id}">&times;</button>
+                            <span class="smlms-drag-handle">&#9776;</span>
+                            <span class="smlms-badge smlms-badge-topic">T</span>
+                            <span>${lIndex + 1}.${tIndex + 1} ${escapeHtml(topic.title)}</span>
+                            <button type="button" class="smlms-remove-step" data-type="topic" data-id="${topic.id}" data-parent-id="${lesson.id}" title="Remove Topic">&times;</button>
                         </div>
                     `;
                 });
@@ -221,16 +233,12 @@ jQuery(document).ready(function($) {
             const lessonHtml = `
                 <div class="smlms-builder-lesson-row ${isSelected}" data-lesson-id="${lesson.id}">
                     <div class="smlms-builder-row-header">
-                        <div class="smlms-row-left">
-                            <span class="smlms-drag-handle">&#8942;&#8942;</span>
-                            <span class="smlms-badge smlms-badge-lesson">L</span>
-                            <strong class="smlms-step-title">${lIndex + 1}. ${escapeHtml(lesson.title)}</strong>
-                            <span class="smlms-sub-count">(${topicCount})</span>
-                        </div>
-                        <div class="smlms-row-right">
-                            <button type="button" class="smlms-remove-step" data-type="lesson" data-id="${lesson.id}">&times;</button>
-                            <span class="smlms-accordion-arrow">&#9660;</span>
-                        </div>
+                        <span class="smlms-drag-handle">&#9776;</span>
+                        <span class="smlms-badge smlms-badge-lesson">L</span>
+                        <strong class="smlms-step-title">${lIndex + 1}. ${escapeHtml(lesson.title)}</strong>
+                        <span class="smlms-sub-count">(${topicCount})</span>
+                        <button type="button" class="smlms-remove-step" data-type="lesson" data-id="${lesson.id}" title="Remove Lesson">&times;</button>
+                        <span class="smlms-accordion-arrow">&#9660;</span>
                     </div>
                     <div class="smlms-builder-topics-body">
                         ${topicsHtml}

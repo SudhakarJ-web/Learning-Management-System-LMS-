@@ -1,25 +1,37 @@
+/**
+ * Sabin Mathew LMS - Focus Mode Frontend Application Script
+ */
 jQuery(document).ready(function($) {
 
-    // 1. Left Sidebar Toggle
-    $('#smlms-sidebar-toggle').on('click', function() {
-        $('#smlms-focus-sidebar').toggleClass('collapsed');
+    // 1. Sidebar Collapse/Expand Toggle
+    $(document).on('click', '#smlms-sidebar-toggle', function(e) {
+        e.preventDefault();
+        $('#smlms-focus-sidebar, .smlms-focus-sidebar').toggleClass('collapsed');
     });
 
-    // 2. Sidebar Accordion Expand/Collapse
-    $(document).on('click', '.smlms-expand-btn', function(e) {
+    // 2. Sidebar Accordion Expand/Collapse (LearnDash Style Tree)
+    $(document).on('click', '.smlms-ld-toggle-btn, .smlms-expand-btn', function(e) {
         e.preventDefault();
-        const wrapper = $(this).closest('.smlms-lesson-item').find('.smlms-topic-list-wrapper');
-        wrapper.slideToggle(150);
-        $(this).toggleClass('expanded');
+        
+        const lessonCard = $(this).closest('.smlms-ld-lesson-card, .smlms-lesson-item');
+        const topicWrapper = lessonCard.find('.smlms-ld-topics-wrapper, .smlms-topic-list-wrapper');
+
+        topicWrapper.slideToggle(150);
+        $(this).toggleClass('active expanded');
     });
 
     // 3. Stage Tabs Switcher (Topic vs Materials)
-    $('.smlms-stage-tab-btn').on('click', function() {
-        $('.smlms-stage-tab-btn').removeClass('active');
-        $('.smlms-stage-tab-pane').removeClass('active');
+    $(document).on('click', '.smlms-stage-tab-btn, .smlms-tab-btn', function(e) {
+        e.preventDefault();
+
+        $('.smlms-stage-tab-btn, .smlms-tab-btn').removeClass('active');
+        $('.smlms-stage-tab-pane, .smlms-tab-pane').removeClass('active');
 
         $(this).addClass('active');
-        $($(this).data('target')).addClass('active');
+        const target = $(this).data('target');
+        if (target && $(target).length) {
+            $(target).addClass('active');
+        }
     });
 
     // 4. Animate Anti-Piracy Watermark
@@ -34,30 +46,34 @@ jQuery(document).ready(function($) {
     }
 
     // 5. Telemetry Pulse to REST API
-    setInterval(async () => {
-        const topicId = smlmsSettings.current_id;
-        if (!topicId) return;
+    if (typeof smlmsSettings !== 'undefined' && smlmsSettings.root && smlmsSettings.current_id) {
+        setInterval(async () => {
+            const topicId = smlmsSettings.current_id;
+            if (!topicId) return;
 
-        try {
-            const response = await fetch(`${smlmsSettings.root}progress/heartbeat`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': smlmsSettings.nonce
-                },
-                body: JSON.stringify({
-                    topic_id: topicId,
-                    watched_seconds: 5,
-                    total_duration: 300
-                })
-            });
+            try {
+                const response = await fetch(`${smlmsSettings.root}progress/heartbeat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-WP-Nonce': smlmsSettings.nonce
+                    },
+                    body: JSON.stringify({
+                        topic_id: topicId,
+                        watched_seconds: 5,
+                        total_duration: 300
+                    })
+                });
 
-            const res = await response.json();
-            if (res.can_complete) {
-                $('#smlms-mark-complete-btn').removeAttr('disabled');
+                if (response.ok) {
+                    const res = await response.json();
+                    if (res.can_complete) {
+                        $('#smlms-mark-complete-btn').prop('disabled', false).removeAttr('disabled');
+                    }
+                }
+            } catch(e) {
+                console.error('Telemetry error:', e);
             }
-        } catch(e) {
-            console.error('Telemetry error:', e);
-        }
-    }, 5000);
+        }, 5000);
+    }
 });

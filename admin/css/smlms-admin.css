@@ -1,10 +1,10 @@
-/* --- Builder Stage Container --- */
+/* --- Sabin Mathew Builder Outer Container --- */
 .smlms-builder-container {
     background: #ffffff;
-    border: 1px solid #c3c4c7;
-    border-radius: 4px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
     padding: 20px;
-    margin-top: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .smlms-builder-header {
@@ -12,14 +12,14 @@
     justify-content: space-between;
     align-items: center;
     padding-bottom: 14px;
-    border-bottom: 1px solid #e2e8f0;
     margin-bottom: 16px;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .smlms-steps-count {
-    font-weight: 600;
-    color: #334155;
+    font-weight: 700;
     font-size: 14px;
+    color: #0f172a;
 }
 
 .smlms-toggle-all {
@@ -29,181 +29,247 @@
     font-size: 13px;
 }
 
-/* --- LearnDash Badge Replicas --- */
-.smlms-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    color: #ffffff;
-    font-weight: 700;
-    font-size: 12px;
-    margin-right: 12px;
-    flex-shrink: 0;
+.smlms-toggle-all:hover {
+    text-decoration: underline;
 }
 
-.smlms-badge-lesson {
-    background-color: #22c55e; /* LearnDash Green */
+/* Canvas Area */
+.smlms-builder-canvas {
+    background-color: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    padding: 16px;
+    min-height: 120px;
 }
 
-.smlms-badge-topic {
-    background-color: #0284c7; /* LearnDash Blue/Teal */
+.smlms-builder-empty-notice {
+    text-align: center;
+    color: #64748b;
+    padding: 35px 15px;
+    font-size: 14px;
 }
 
-/* --- Builder Canvas Rows --- */
+/* --- Lesson Step Cards --- */
 .smlms-builder-lesson-row {
     background: #ffffff;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
     overflow: hidden;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+.smlms-builder-lesson-row:hover {
+    border-color: #0284c7;
+    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.12);
+}
+
 .smlms-builder-lesson-row.smlms-active-lesson-row {
-    border: 2px solid #0284c7 !important;
-    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.15);
+    border-color: #0284c7;
+    border-left: 4px solid #0284c7;
 }
 
 .smlms-builder-row-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 14px 18px;
-    background: #f8fafc;
+    padding: 12px 16px;
+    background: #ffffff;
+    gap: 12px;
     cursor: pointer;
     user-select: none;
 }
 
-.smlms-builder-lesson-row.smlms-active-lesson-row .smlms-builder-row-header {
-    background-color: #f0f9ff !important;
-}
-
-.smlms-row-left, .smlms-row-right {
-    display: flex;
-    align-items: center;
-}
-
 .smlms-drag-handle {
     color: #94a3b8;
-    margin-right: 12px;
-    cursor: grab;
     font-size: 16px;
-    letter-spacing: -2px;
+    cursor: grab;
+    padding: 0 4px;
+}
+
+/* LearnDash "L" and "T" Badges */
+.smlms-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.smlms-badge-lesson {
+    background-color: #22c55e; /* Green for Lesson */
+}
+
+.smlms-badge-topic {
+    background-color: #0284c7; /* Blue for Topic */
 }
 
 .smlms-step-title {
     font-size: 14px;
+    font-weight: 600;
     color: #0f172a;
+    flex: 1;
 }
 
 .smlms-sub-count {
     color: #64748b;
-    font-size: 13px;
-    margin-left: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 6px;
 }
 
 .smlms-remove-step {
     background: none;
     border: none;
     color: #94a3b8;
-    font-size: 20px;
-    line-height: 1;
+    font-size: 18px;
+    font-weight: bold;
     cursor: pointer;
-    padding: 0 8px;
-    transition: color 0.2s;
+    padding: 2px 8px;
+    border-radius: 4px;
+    line-height: 1;
+    transition: color 0.2s, background 0.2s;
 }
 
 .smlms-remove-step:hover {
     color: #ef4444;
+    background: #fee2e2;
 }
 
 .smlms-accordion-arrow {
-    color: #0284c7;
-    font-size: 12px;
-    margin-left: 10px;
-    transition: transform 0.2s;
+    color: #64748b;
+    font-size: 10px;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f1f5f9;
 }
 
-.smlms-accordion-arrow.smlms-arrow-up {
-    transform: rotate(180deg);
-}
-
-/* --- Nested Topics Tree --- */
+/* --- Nested Topics Section --- */
 .smlms-builder-topics-body {
-    padding: 12px 18px 12px 48px;
-    background: #ffffff;
-    border-top: 1px solid #f1f5f9;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 10px 14px 10px 36px;
+}
+
+.smlms-no-topics-notice {
+    color: #94a3b8;
+    font-size: 12px;
+    font-style: italic;
+    margin: 4px 0;
 }
 
 .smlms-builder-topic-row {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 10px 14px;
-    background: #f8fafc;
+    gap: 10px;
+    background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    margin-bottom: 8px;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    transition: border-color 0.2s;
 }
 
-.smlms-builder-topic-row:last-child {
-    margin-bottom: 0;
+.smlms-builder-topic-row:hover {
+    border-color: #0284c7;
 }
 
-/* --- Sidebar Pickers --- */
+.smlms-builder-topic-row span:not(.smlms-badge):not(.smlms-drag-handle) {
+    font-size: 13px;
+    color: #334155;
+    flex: 1;
+}
+
+/* --- Right Sidebar Pickers (Lessons & Topics) --- */
 .smlms-sidebar-picker-box {
     background: #ffffff;
+    border: 1px solid #c3c4c7;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 15px;
 }
 
 .smlms-picker-search {
     margin-bottom: 10px !important;
     border-radius: 4px !important;
-    border: 1px solid #c3c4c7 !important;
 }
 
 .smlms-picker-items {
-    max-height: 220px;
+    max-height: 180px;
     overflow-y: auto;
-    border: 1px solid #dcdcde;
-    padding: 8px;
+    border: 1px solid #e2e8f0;
     border-radius: 4px;
-    background: #f8fafc;
+    padding: 4px;
     margin-bottom: 12px;
+    background: #ffffff;
 }
 
 .smlms-picker-row {
     display: flex;
     align-items: center;
-    padding: 6px 4px;
-    border-bottom: 1px solid #f1f5f9;
+    gap: 8px;
+    padding: 6px 8px;
+    border-bottom: 1px solid #f8fafc;
     cursor: pointer;
-    font-size: 13px;
+    border-radius: 3px;
 }
 
 .smlms-picker-row:hover {
-    background: #e2e8f0;
+    background-color: #f1f5f9;
 }
 
-.smlms-picker-cb {
-    margin-right: 10px !important;
+.smlms-picker-row input[type="checkbox"] {
+    margin: 0 !important;
 }
 
 .smlms-item-title {
+    font-size: 13px;
     color: #1e293b;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .smlms-picker-footer button {
     width: 100%;
+    text-align: center;
+    justify-content: center;
 }
 
-.smlms-builder-empty-notice, .smlms-no-topics-notice {
-    color: #64748b;
-    font-size: 13px;
-    padding: 10px 0;
+/* --- Navigation Header Tabs --- */
+.smlms-admin-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    border-bottom: 1px solid #c3c4c7;
+    padding: 10px 20px;
+    margin: -10px -20px 20px -20px;
+}
+
+.smlms-header-tabs {
+    display: flex;
+    gap: 15px;
+}
+
+.smlms-header-tabs .smlms-tab {
+    padding: 8px 16px;
+    text-decoration: none;
+    font-weight: 600;
+    color: #0284c7;
+    border-bottom: 3px solid transparent;
+}
+
+.smlms-header-tabs .smlms-tab.active {
+    color: #0284c7;
+    border-bottom-color: #0284c7;
 }

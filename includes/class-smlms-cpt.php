@@ -1,6 +1,6 @@
 <?php
 /**
- * Interactive Sabin Mathew Builder, Custom Columns, & CPT Handler
+ * Interactive Sabin Mathew Builder, Custom Columns, & Meta Box Handler
  */
 
 if (!defined('ABSPATH')) {
@@ -16,7 +16,6 @@ class SMLMS_CPT {
         add_action('save_post', [$this, 'save_meta_box_data']);
         add_filter('parent_file', [$this, 'fix_parent_menu_highlight']);
 
-        // Custom Columns for Courses List Table
         add_filter('manage_smlms_course_posts_columns', [$this, 'set_course_table_columns']);
         add_action('manage_smlms_course_posts_custom_column', [$this, 'render_course_table_columns'], 10, 2);
     }
@@ -117,11 +116,300 @@ class SMLMS_CPT {
     }
 
     public function add_custom_meta_boxes() {
+        // Course Boxes
         add_meta_box('smlms_course_builder_box', 'Sabin Mathew Builder', [$this, 'render_course_builder_meta_box'], 'smlms_course', 'normal', 'high');
+        add_meta_box('smlms_course_custom_meta_box', 'Sabin Mathew Course Custom Meta', [$this, 'render_course_custom_meta_box'], 'smlms_course', 'normal', 'high');
+        add_meta_box('smlms_course_enrollment_box', 'Course Enrollment', [$this, 'render_course_enrollment_box'], 'smlms_course', 'normal', 'default');
+        add_meta_box('smlms_course_students_box', 'Course Students', [$this, 'render_course_students_box'], 'smlms_course', 'normal', 'default');
+
         add_meta_box('smlms_course_settings', 'Course Pricing & Type', [$this, 'render_course_meta_box'], 'smlms_course', 'side', 'default');
         add_meta_box('smlms_sidebar_lessons_box', 'Lessons', [$this, 'render_sidebar_lessons_box'], 'smlms_course', 'side', 'default');
         add_meta_box('smlms_sidebar_topics_box', 'Topics', [$this, 'render_sidebar_topics_box'], 'smlms_course', 'side', 'default');
-        add_meta_box('smlms_topic_settings', 'Topic Settings & Video Provider', [$this, 'render_topic_meta_box'], 'smlms_topic', 'normal', 'high');
+
+        // Lesson & Topic Boxes
+        add_meta_box('smlms_custom_item_meta_box', 'Sabin Mathew Custom Meta', [$this, 'render_custom_item_meta_box'], ['smlms_lesson', 'smlms_topic'], 'normal', 'high');
+        add_meta_box('smlms_display_content_options', 'Display and Content Options', [$this, 'render_display_content_options'], ['smlms_lesson', 'smlms_topic'], 'normal', 'high');
+    }
+
+    /**
+     * Render LearnDash Replica "Course Enrollment" Settings
+     */
+    public function render_course_enrollment_box($post) {
+        wp_nonce_field('smlms_save_enrollment_meta', 'smlms_enrollment_nonce');
+
+        $price_type = get_post_meta($post->ID, '_smlms_price_type', true) ?: 'closed';
+        $price      = get_post_meta($post->ID, '_smlms_price', true);
+        $button_url = get_post_meta($post->ID, '_smlms_button_url', true);
+        ?>
+        <div class="smlms-enrollment-panel">
+            <p class="smlms-panel-subheading">Controls how students gain access to the course</p>
+
+            <div class="smlms-radio-options-list">
+                <!-- Open -->
+                <label class="smlms-enroll-radio-row">
+                    <input type="radio" name="smlms_price_type" value="open" <?php checked($price_type, 'open'); ?> class="smlms-enroll-mode-radio">
+                    <div>
+                        <strong>Open</strong>
+                        <p class="description">The course is not protected. Any student can access its content without the need to be logged-in or enrolled.</p>
+                    </div>
+                </label>
+
+                <!-- Free -->
+                <label class="smlms-enroll-radio-row">
+                    <input type="radio" name="smlms_price_type" value="free" <?php checked($price_type, 'free'); ?> class="smlms-enroll-mode-radio">
+                    <div>
+                        <strong>Free</strong>
+                        <p class="description">The course is protected. Registration and enrollment are required in order to access the content.</p>
+                    </div>
+                </label>
+
+                <!-- Buy Now -->
+                <label class="smlms-enroll-radio-row">
+                    <input type="radio" name="smlms_price_type" value="buy_now" <?php checked($price_type, 'buy_now'); ?> class="smlms-enroll-mode-radio">
+                    <div>
+                        <strong>Buy now</strong>
+                        <p class="description">The course is protected via the built-in payment gateway. Students need to purchase the course (one-time fee) in order to gain access.</p>
+                    </div>
+                </label>
+
+                <!-- Recurring -->
+                <label class="smlms-enroll-radio-row">
+                    <input type="radio" name="smlms_price_type" value="recurring" <?php checked($price_type, 'recurring'); ?> class="smlms-enroll-mode-radio">
+                    <div>
+                        <strong>Recurring</strong>
+                        <p class="description">The course is protected via the built-in payment gateway. Students need to purchase the course (recurring fee) in order to gain access.</p>
+                    </div>
+                </label>
+
+                <!-- Closed -->
+                <label class="smlms-enroll-radio-row">
+                    <input type="radio" name="smlms_price_type" value="closed" <?php checked($price_type, 'closed'); ?> class="smlms-enroll-mode-radio">
+                    <div>
+                        <strong>Closed</strong>
+                        <p class="description">The course can only be accessed through admin enrollment (manual), group enrollment, or integration (shopping cart or membership) enrollment. No enrollment button will be displayed, unless a URL is set (optional).</p>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Sub-fields for Price & Button URL -->
+            <div id="smlms-enroll-subfields" class="smlms-enroll-subfields-box" style="<?php echo in_array($price_type, ['buy_now', 'recurring', 'closed']) ? '' : 'display:none;'; ?>">
+                <div class="smlms-form-row">
+                    <label><strong>Course Price</strong></label>
+                    <input type="number" step="0.01" name="smlms_price" value="<?php echo esc_attr($price); ?>" class="regular-text" placeholder="e.g. 25">
+                </div>
+                <div class="smlms-form-row">
+                    <label><strong>Button URL</strong> <span class="smlms-help-icon" title="Redirect URL for purchase button">?</span></label>
+                    <input type="text" name="smlms_button_url" value="<?php echo esc_attr($button_url); ?>" class="widefat" placeholder="https://sabinmathew.com/cart/?add-to-cart=86">
+                </div>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * Render LearnDash Replica "Course Students" Dual List Box
+     */
+    public function render_course_students_box($post) {
+        global $wpdb;
+        wp_nonce_field('smlms_save_students_meta', 'smlms_students_nonce');
+
+        // Fetch enrolled user IDs from DB table
+        $enrolled_ids = $wpdb->get_col($wpdb->prepare(
+            "SELECT user_id FROM {$wpdb->prefix}smlms_enrollments WHERE course_id = %d AND status = 'active'",
+            $post->ID
+        ));
+        if (!is_array($enrolled_ids)) $enrolled_ids = [];
+
+        // All Users Query
+        $all_users = get_users(['number' => 500, 'orderby' => 'display_name', 'order' => 'ASC']);
+
+        $unassigned_users = [];
+        $assigned_users   = [];
+
+        foreach ($all_users as $u) {
+            $user_info = $u->display_name . ' (' . $u->user_login . ')';
+            if (in_array($u->ID, $enrolled_ids)) {
+                $assigned_users[$u->ID] = $user_info;
+            } else {
+                $unassigned_users[$u->ID] = $user_info;
+            }
+        }
+        ?>
+        <div class="smlms-students-panel">
+            <p class="smlms-panel-subheading">Students enrolled via Groups using this Course are excluded from the listings below and should be managed via the Group admin screen.</p>
+
+            <div class="smlms-dual-selector-wrapper">
+                <!-- Left Box: All Unassigned Users -->
+                <div class="smlms-selector-column">
+                    <input type="text" class="smlms-user-search-input widefat" placeholder="Search All Course Users..." data-target="#smlms-unassigned-users-select">
+                    <select id="smlms-unassigned-users-select" class="smlms-dual-listbox" multiple size="10">
+                        <?php foreach ($unassigned_users as $uid => $uname): ?>
+                            <option value="<?php echo $uid; ?>"><?php echo esc_html($uname); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <!-- Middle Action Controls -->
+                <div class="smlms-selector-actions">
+                    <button type="button" id="smlms-btn-assign-users" class="button button-secondary" title="Assign Selected">&rarr;</button>
+                    <button type="button" id="smlms-btn-remove-users" class="button button-secondary" title="Remove Selected">&larr;</button>
+                </div>
+
+                <!-- Right Box: Assigned Course Users -->
+                <div class="smlms-selector-column">
+                    <input type="text" class="smlms-user-search-input widefat" placeholder="Search Assigned Course Users..." data-target="#smlms-assigned-users-select">
+                    <select id="smlms-assigned-users-select" class="smlms-dual-listbox" multiple size="10">
+                        <?php foreach ($assigned_users as $uid => $uname): ?>
+                            <option value="<?php echo $uid; ?>"><?php echo esc_html($uname); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Hidden Enrolled IDs array -->
+            <div id="smlms-assigned-hidden-inputs">
+                <?php foreach ($assigned_users as $uid => $uname): ?>
+                    <input type="hidden" name="smlms_enrolled_user_ids[]" value="<?php echo $uid; ?>">
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php
+    }
+
+    public function render_course_custom_meta_box($post) {
+        wp_nonce_field('smlms_save_course_custom_meta', 'smlms_course_custom_nonce');
+
+        $headline     = get_post_meta($post->ID, '_smlms_course_headline', true);
+        $short_desc   = get_post_meta($post->ID, '_smlms_course_short_desc', true);
+        $duration     = get_post_meta($post->ID, '_smlms_duration', true) ?: '4 Weeks';
+        $level        = get_post_meta($post->ID, '_smlms_level', true) ?: 'Beginner';
+        $language     = get_post_meta($post->ID, '_smlms_language', true) ?: 'English';
+        $num_lessons  = get_post_meta($post->ID, '_smlms_num_lessons', true);
+        $enrolled     = get_post_meta($post->ID, '_smlms_students_enrolled', true) ?: '17';
+        $content_type = get_post_meta($post->ID, '_smlms_content_type', true) ?: 'Video';
+        $media_embed  = get_post_meta($post->ID, '_smlms_media_embed', true);
+        ?>
+        <table class="form-table smlms-custom-meta-table">
+            <tr>
+                <th><label for="smlms_course_headline">Course Headline</label></th>
+                <td><input type="text" id="smlms_course_headline" name="smlms_course_headline" value="<?php echo esc_attr($headline); ?>" class="widefat"></td>
+            </tr>
+            <tr>
+                <th><label for="smlms_course_short_desc">Course Short Description</label></th>
+                <td><textarea id="smlms_course_short_desc" name="smlms_course_short_desc" rows="3" class="widefat"><?php echo esc_textarea($short_desc); ?></textarea></td>
+            </tr>
+            <tr>
+                <th><label for="smlms_duration">Estimated Duration</label></th>
+                <td><input type="text" id="smlms_duration" name="smlms_duration" value="<?php echo esc_attr($duration); ?>" class="regular-text"></td>
+            </tr>
+            <tr>
+                <th><label for="smlms_level">Course Level</label></th>
+                <td>
+                    <select id="smlms_level" name="smlms_level" class="regular-text">
+                        <option value="Beginner" <?php selected($level, 'Beginner'); ?>>Beginner</option>
+                        <option value="Intermediate" <?php selected($level, 'Intermediate'); ?>>Intermediate</option>
+                        <option value="Advanced" <?php selected($level, 'Advanced'); ?>>Advanced</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="smlms_language">Course Language</label></th>
+                <td><input type="text" id="smlms_language" name="smlms_language" value="<?php echo esc_attr($language); ?>" class="regular-text"></td>
+            </tr>
+            <tr>
+                <th><label for="smlms_num_lessons">Number of Lessons</label></th>
+                <td><input type="text" id="smlms_num_lessons" name="smlms_num_lessons" value="<?php echo esc_attr($num_lessons); ?>" class="regular-text"></td>
+            </tr>
+            <tr>
+                <th><label for="smlms_students_enrolled">Students Enrolled</label></th>
+                <td><input type="text" id="smlms_students_enrolled" name="smlms_students_enrolled" value="<?php echo esc_attr($enrolled); ?>" class="regular-text"></td>
+            </tr>
+            <tr>
+                <th><label for="smlms_content_type">Content Type</label></th>
+                <td>
+                    <select id="smlms_content_type" name="smlms_content_type" class="regular-text">
+                        <option value="Video" <?php selected($content_type, 'Video'); ?>>Video</option>
+                        <option value="Text" <?php selected($content_type, 'Text'); ?>>Text</option>
+                        <option value="Audio" <?php selected($content_type, 'Audio'); ?>>Audio</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="smlms_media_embed">Media Embed / Video Preview URL</label></th>
+                <td><textarea id="smlms_media_embed" name="smlms_media_embed" rows="2" class="widefat" placeholder="e.g. https://vimeo.com/1201710349"><?php echo esc_textarea($media_embed); ?></textarea></td>
+            </tr>
+        </table>
+        <?php
+    }
+
+    public function render_custom_item_meta_box($post) {
+        wp_nonce_field('smlms_save_custom_item_meta', 'smlms_custom_item_nonce');
+        $duration     = get_post_meta($post->ID, '_smlms_duration', true);
+        $content_type = get_post_meta($post->ID, '_smlms_content_type', true) ?: 'video';
+        ?>
+        <table class="form-table smlms-custom-meta-table">
+            <tr>
+                <th><label for="smlms_duration">Estimated Duration</label></th>
+                <td><input type="text" id="smlms_duration" name="smlms_duration" value="<?php echo esc_attr($duration); ?>" placeholder="e.g. 2.24 or 7.03" class="regular-text"></td>
+            </tr>
+            <tr>
+                <th><label for="smlms_content_type">Content Type</label></th>
+                <td>
+                    <select id="smlms_content_type" name="smlms_content_type" class="regular-text">
+                        <option value="text" <?php selected($content_type, 'text'); ?>>Text</option>
+                        <option value="video" <?php selected($content_type, 'video'); ?>>Video</option>
+                        <option value="audio" <?php selected($content_type, 'audio'); ?>>Audio</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+        <?php
+    }
+
+    public function render_display_content_options($post) {
+        wp_nonce_field('smlms_save_options_meta', 'smlms_options_nonce');
+        $is_lesson         = ($post->post_type === 'smlms_lesson');
+        $item_label        = $is_lesson ? 'Lesson' : 'Topic';
+
+        $materials_enabled = get_post_meta($post->ID, '_smlms_materials_enabled', true) ?: '1';
+        $materials_content = get_post_meta($post->ID, '_smlms_materials', true);
+
+        $video_enabled      = get_post_meta($post->ID, '_smlms_video_enabled', true) ?: '1';
+        $video_url          = get_post_meta($post->ID, '_smlms_video_id', true);
+        ?>
+        <div class="smlms-options-panel">
+            <p class="smlms-panel-subheading">Controls optional content settings for this <?php echo strtolower($item_label); ?></p>
+
+            <div class="smlms-option-group">
+                <div class="smlms-option-header">
+                    <strong><?php echo $item_label; ?> Materials</strong>
+                    <label class="smlms-switch">
+                        <input type="checkbox" name="smlms_materials_enabled" value="1" <?php checked($materials_enabled, '1'); ?> class="smlms-toggle-trigger" data-target="#smlms-materials-body">
+                        <span class="smlms-slider"></span>
+                    </label>
+                </div>
+                <div id="smlms-materials-body" class="smlms-option-body" style="<?php echo ($materials_enabled === '1') ? '' : 'display:none;'; ?>">
+                    <?php wp_editor($materials_content, 'smlms_materials_editor', ['textarea_name' => 'smlms_materials', 'textarea_rows' => 5, 'media_buttons' => true]); ?>
+                </div>
+            </div>
+
+            <div class="smlms-option-group">
+                <div class="smlms-option-header">
+                    <strong>Video Progression</strong>
+                    <label class="smlms-switch">
+                        <input type="checkbox" name="smlms_video_enabled" value="1" <?php checked($video_enabled, '1'); ?> class="smlms-toggle-trigger" data-target="#smlms-video-body">
+                        <span class="smlms-slider"></span>
+                    </label>
+                </div>
+                <div id="smlms-video-body" class="smlms-option-body" style="<?php echo ($video_enabled === '1') ? '' : 'display:none;'; ?>">
+                    <div class="smlms-field-row">
+                        <label><strong>Video URL / Vimeo ID</strong></label>
+                        <textarea name="smlms_video_id" rows="2" class="widefat" placeholder="Input URL or Vimeo ID here"><?php echo esc_textarea($video_url); ?></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
     }
 
     public function render_course_meta_box($post) {
@@ -144,11 +432,8 @@ class SMLMS_CPT {
         <?php
     }
 
-    public function render_topic_meta_box($post) {
-        wp_nonce_field('smlms_save_topic_meta', 'smlms_topic_nonce');
+    public function render_topic_parent_meta_box($post) {
         $parent_lesson = get_post_meta($post->ID, '_smlms_parent_lesson_id', true);
-        $video_id      = get_post_meta($post->ID, '_smlms_video_id', true);
-        $materials     = get_post_meta($post->ID, '_smlms_materials', true);
         $lessons       = get_posts(['post_type' => 'smlms_lesson', 'numberposts' => -1]);
         ?>
         <p>
@@ -162,13 +447,23 @@ class SMLMS_CPT {
                 <?php endforeach; ?>
             </select>
         </p>
+        <?php
+    }
+
+    public function render_lesson_parent_meta_box($post) {
+        $parent_course = get_post_meta($post->ID, '_smlms_parent_course_id', true);
+        $courses       = get_posts(['post_type' => 'smlms_course', 'numberposts' => -1]);
+        ?>
         <p>
-            <label><strong>Cloudflare / Vimeo Video ID:</strong></label><br>
-            <input type="text" name="smlms_video_id" value="<?php echo esc_attr($video_id); ?>" class="widefat">
-        </p>
-        <p>
-            <label><strong>Topic Materials:</strong></label><br>
-            <textarea name="smlms_materials" rows="4" class="widefat"><?php echo esc_textarea($materials); ?></textarea>
+            <label><strong>Parent Course:</strong></label><br>
+            <select name="smlms_parent_course_id" class="widefat">
+                <option value="">-- Select Parent Course --</option>
+                <?php foreach ($courses as $course): ?>
+                    <option value="<?php echo $course->ID; ?>" <?php selected($parent_course, $course->ID); ?>>
+                        <?php echo esc_html($course->post_title); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
         </p>
         <?php
     }
@@ -195,17 +490,13 @@ class SMLMS_CPT {
         <div class="smlms-sidebar-picker-box" data-type="lesson">
             <input type="text" class="smlms-picker-search widefat" placeholder="Search Lessons...">
             <div class="smlms-picker-items">
-                <?php if (empty($lessons)): ?>
-                    <p class="smlms-no-items">No published lessons found.</p>
-                <?php else: ?>
-                    <?php foreach ($lessons as $lesson): ?>
-                        <label class="smlms-picker-row">
-                            <input type="checkbox" class="smlms-picker-cb" value="<?php echo $lesson->ID; ?>" data-title="<?php echo esc_attr($lesson->post_title); ?>">
-                            <span class="smlms-badge smlms-badge-lesson">L</span>
-                            <span class="smlms-item-title"><?php echo esc_html($lesson->post_title); ?></span>
-                        </label>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+                <?php foreach ($lessons as $lesson): ?>
+                    <label class="smlms-picker-row">
+                        <input type="checkbox" class="smlms-picker-cb" value="<?php echo $lesson->ID; ?>" data-title="<?php echo esc_attr($lesson->post_title); ?>">
+                        <span class="smlms-badge smlms-badge-lesson">L</span>
+                        <span class="smlms-item-title"><?php echo esc_html($lesson->post_title); ?></span>
+                    </label>
+                <?php endforeach; ?>
             </div>
             <div class="smlms-picker-footer">
                 <button type="button" class="button button-primary smlms-add-lessons-btn">Add to Builder</button>
@@ -220,17 +511,13 @@ class SMLMS_CPT {
         <div class="smlms-sidebar-picker-box" data-type="topic">
             <input type="text" class="smlms-picker-search widefat" placeholder="Search Topics...">
             <div class="smlms-picker-items">
-                <?php if (empty($topics)): ?>
-                    <p class="smlms-no-items">No published topics found.</p>
-                <?php else: ?>
-                    <?php foreach ($topics as $topic): ?>
-                        <label class="smlms-picker-row">
-                            <input type="checkbox" class="smlms-picker-cb" value="<?php echo $topic->ID; ?>" data-title="<?php echo esc_attr($topic->post_title); ?>">
-                            <span class="smlms-badge smlms-badge-topic">T</span>
-                            <span class="smlms-item-title"><?php echo esc_html($topic->post_title); ?></span>
-                        </label>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+                <?php foreach ($topics as $topic): ?>
+                    <label class="smlms-picker-row">
+                        <input type="checkbox" class="smlms-picker-cb" value="<?php echo $topic->ID; ?>" data-title="<?php echo esc_attr($topic->post_title); ?>">
+                        <span class="smlms-badge smlms-badge-topic">T</span>
+                        <span class="smlms-item-title"><?php echo esc_html($topic->post_title); ?></span>
+                    </label>
+                <?php endforeach; ?>
             </div>
             <div class="smlms-picker-footer">
                 <button type="button" class="button button-primary smlms-add-topics-btn">Add Topics to Lesson</button>
@@ -239,9 +526,79 @@ class SMLMS_CPT {
         <?php
     }
 
+    /**
+     * Non-Recursive Safe Post Saving
+     */
     public function save_meta_box_data($post_id) {
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+        global $wpdb;
 
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+        if (wp_is_post_revision($post_id) || wp_is_post_autosave($post_id)) return;
+
+        // 1. Enrollment Settings
+        if (isset($_POST['smlms_enrollment_nonce']) && wp_verify_nonce($_POST['smlms_enrollment_nonce'], 'smlms_save_enrollment_meta')) {
+            if (isset($_POST['smlms_price_type'])) update_post_meta($post_id, '_smlms_price_type', sanitize_text_field($_POST['smlms_price_type']));
+            if (isset($_POST['smlms_price'])) update_post_meta($post_id, '_smlms_price', sanitize_text_field($_POST['smlms_price']));
+            if (isset($_POST['smlms_button_url'])) update_post_meta($post_id, '_smlms_button_url', esc_url_raw($_POST['smlms_button_url']));
+        }
+
+        // 2. Course Students Enrollment Sync
+        if (isset($_POST['smlms_students_nonce']) && wp_verify_nonce($_POST['smlms_students_nonce'], 'smlms_save_students_meta')) {
+            $assigned_ids = isset($_POST['smlms_enrolled_user_ids']) && is_array($_POST['smlms_enrolled_user_ids']) ? array_map('intval', $_POST['smlms_enrolled_user_ids']) : [];
+
+            // Clear current enrollments for this course
+            $wpdb->delete($wpdb->prefix . 'smlms_enrollments', ['course_id' => $post_id], ['%d']);
+
+            // Insert newly assigned students
+            foreach ($assigned_ids as $uid) {
+                $wpdb->insert(
+                    $wpdb->prefix . 'smlms_enrollments',
+                    [
+                        'user_id'     => $uid,
+                        'course_id'   => $post_id,
+                        'status'      => 'active',
+                        'enrolled_at' => current_time('mysql')
+                    ],
+                    ['%d', '%d', '%s', '%s']
+                );
+            }
+
+            // Sync enrolled count
+            update_post_meta($post_id, '_smlms_students_enrolled', count($assigned_ids));
+        }
+
+        // 3. Course Custom Meta
+        if (isset($_POST['smlms_course_custom_nonce']) && wp_verify_nonce($_POST['smlms_course_custom_nonce'], 'smlms_save_course_custom_meta')) {
+            $fields = ['smlms_course_headline', 'smlms_course_short_desc', 'smlms_duration', 'smlms_level', 'smlms_language', 'smlms_num_lessons', 'smlms_students_enrolled', 'smlms_content_type', 'smlms_media_embed'];
+            foreach ($fields as $field) {
+                if (isset($_POST[$field])) {
+                    update_post_meta($post_id, '_' . $field, sanitize_textarea_field($_POST[$field]));
+                }
+            }
+        }
+
+        // 4. Custom Item Meta (Lessons/Topics)
+        if (isset($_POST['smlms_custom_item_nonce']) && wp_verify_nonce($_POST['smlms_custom_item_nonce'], 'smlms_save_custom_item_meta')) {
+            if (isset($_POST['smlms_duration'])) update_post_meta($post_id, '_smlms_duration', sanitize_text_field($_POST['smlms_duration']));
+            if (isset($_POST['smlms_content_type'])) update_post_meta($post_id, '_smlms_content_type', sanitize_text_field($_POST['smlms_content_type']));
+        }
+
+        // 5. Display and Content Options
+        if (isset($_POST['smlms_options_nonce']) && wp_verify_nonce($_POST['smlms_options_nonce'], 'smlms_save_options_meta')) {
+            update_post_meta($post_id, '_smlms_materials_enabled', isset($_POST['smlms_materials_enabled']) ? '1' : '0');
+            if (isset($_POST['smlms_materials'])) update_post_meta($post_id, '_smlms_materials', $_POST['smlms_materials']);
+
+            update_post_meta($post_id, '_smlms_video_enabled', isset($_POST['smlms_video_enabled']) ? '1' : '0');
+            if (isset($_POST['smlms_video_id'])) update_post_meta($post_id, '_smlms_video_id', sanitize_textarea_field($_POST['smlms_video_id']));
+        }
+
+        // 6. Parents & Pricing
+        if (isset($_POST['smlms_parent_lesson_id'])) update_post_meta($post_id, '_smlms_parent_lesson_id', sanitize_text_field($_POST['smlms_parent_lesson_id']));
+        if (isset($_POST['smlms_parent_course_id'])) update_post_meta($post_id, '_smlms_parent_course_id', sanitize_text_field($_POST['smlms_parent_course_id']));
+        if (isset($_POST['smlms_price_type'])) update_post_meta($post_id, '_smlms_price_type', sanitize_text_field($_POST['smlms_price_type']));
+        if (isset($_POST['smlms_price'])) update_post_meta($post_id, '_smlms_price', sanitize_text_field($_POST['smlms_price']));
+
+        // 7. Builder JSON
         if (isset($_POST['smlms_builder_nonce']) && wp_verify_nonce($_POST['smlms_builder_nonce'], 'smlms_save_builder_meta')) {
             if (isset($_POST['smlms_course_tree_json'])) {
                 $json_str = wp_unslash($_POST['smlms_course_tree_json']);
@@ -249,32 +606,19 @@ class SMLMS_CPT {
 
                 $tree_data = json_decode($json_str, true);
                 if (is_array($tree_data)) {
-                    foreach ($tree_data as $l_index => $lesson_node) {
+                    foreach ($tree_data as $lesson_node) {
                         $lesson_id = intval($lesson_node['id']);
                         update_post_meta($lesson_id, '_smlms_parent_course_id', $post_id);
-                        wp_update_post(['ID' => $lesson_id, 'menu_order' => $l_index + 1]);
 
                         if (!empty($lesson_node['topics']) && is_array($lesson_node['topics'])) {
-                            foreach ($lesson_node['topics'] as $t_index => $topic_node) {
+                            foreach ($lesson_node['topics'] as $topic_node) {
                                 $topic_id = intval($topic_node['id']);
                                 update_post_meta($topic_id, '_smlms_parent_lesson_id', $lesson_id);
-                                wp_update_post(['ID' => $topic_id, 'menu_order' => $t_index + 1]);
                             }
                         }
                     }
                 }
             }
-        }
-
-        if (isset($_POST['smlms_course_nonce']) && wp_verify_nonce($_POST['smlms_course_nonce'], 'smlms_save_course_meta')) {
-            if (isset($_POST['smlms_price_type'])) update_post_meta($post_id, '_smlms_price_type', sanitize_text_field($_POST['smlms_price_type']));
-            if (isset($_POST['smlms_price'])) update_post_meta($post_id, '_smlms_price', sanitize_text_field($_POST['smlms_price']));
-        }
-
-        if (isset($_POST['smlms_topic_nonce']) && wp_verify_nonce($_POST['smlms_topic_nonce'], 'smlms_save_topic_meta')) {
-            if (isset($_POST['smlms_parent_lesson_id'])) update_post_meta($post_id, '_smlms_parent_lesson_id', sanitize_text_field($_POST['smlms_parent_lesson_id']));
-            if (isset($_POST['smlms_video_id'])) update_post_meta($post_id, '_smlms_video_id', sanitize_text_field($_POST['smlms_video_id']));
-            if (isset($_POST['smlms_materials'])) update_post_meta($post_id, '_smlms_materials', $_POST['smlms_materials']);
         }
     }
 
