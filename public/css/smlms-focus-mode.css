@@ -1,36 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 /* --- Global Reset for Focus Mode --- */
+html,
 body.smlms-focus-mode-active {
     margin: 0 !important;
     padding: 0 !important;
-    overflow-x: hidden !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     background-color: #ffffff !important;
     color: #2d3748 !important;
+    font-weight: 400 !important;
 }
 
-.smlms-focus-wrapper {
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
+body.smlms-focus-mode-active button,
+body.smlms-focus-mode-active input,
+body.smlms-focus-mode-active select,
+body.smlms-focus-mode-active textarea {
+    font-family: 'Poppins', sans-serif !important;
 }
 
+/* --- Strict Dashicons Reset inside Focus Mode --- */
+body.smlms-focus-mode-active .dashicons,
+body.smlms-focus-mode-active span.dashicons {
+    font-family: "dashicons" !important;
+    font-style: normal !important;
+    font-weight: normal !important;
+    font-variant: normal !important;
+    text-transform: none !important;
+    line-height: 1 !important;
+    display: inline-block !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* --- Wrapper & Main Grid --- */
+.smlms-focus-wrapper,
 .smlms-focus-container {
-	padding-top: 50px;
-    display: flex;
-    width: 100%;
-    height: 100%;
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow: hidden !important;
 }
 
 /* --- Left Sidebar (LearnDash Light Style) --- */
 .smlms-focus-sidebar {
     width: 380px !important;
-    background-color: #f8fafc !important; /* Light Slate / Grey */
+    min-width: 380px !important;
+    max-width: 380px !important;
+    background-color: #f8fafc !important;
     border-right: 1px solid #cbd5e1 !important;
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    overflow: hidden;
-    transition: margin-left 0.3s ease;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    transition: margin-left 0.3s ease !important;
 }
 
 .smlms-focus-sidebar.collapsed {
@@ -39,20 +69,21 @@ body.smlms-focus-mode-active {
 
 /* Bright Cyan Course Banner Header */
 .smlms-sidebar-course-header {
-    background-color: #00a2e8 !important; /* LearnDash Primary Blue */
+    background-color: #00a2e8 !important;
     color: #ffffff !important;
     padding: 16px 20px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    gap: 12px;
+    gap: 12px !important;
+    box-sizing: border-box !important;
 }
 
 .smlms-course-header-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    overflow: hidden;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    overflow: hidden !important;
 }
 
 .smlms-header-icon {
@@ -61,9 +92,9 @@ body.smlms-focus-mode-active {
 }
 
 .smlms-course-header-title {
-    color: #ffffff !important; /* Override Red Theme Links */
+    color: #ffffff !important;
     text-decoration: none !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     font-size: 15px !important;
     line-height: 1.3 !important;
 }
@@ -75,18 +106,18 @@ body.smlms-focus-mode-active {
     width: 30px !important;
     height: 30px !important;
     border-radius: 4px !important;
-    cursor: pointer;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+    cursor: pointer !important;
+    font-weight: 600 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
 }
 
-/* Navigation Tree Body */
+/* Navigation Tree Scroll Area */
 .smlms-sidebar-content-scroll {
-    overflow-y: auto;
-    flex-grow: 1;
+    overflow-y: auto !important;
+    flex-grow: 1 !important;
     padding: 15px !important;
     background-color: #f8fafc !important;
 }
@@ -95,9 +126,9 @@ body.smlms-focus-mode-active {
 .smlms-ld-lesson-card {
     background: #ffffff !important;
     border: 1px solid #cbd5e1 !important;
-    border-radius: 4px !important;
+    border-radius: 6px !important;
     margin-bottom: 10px !important;
-    overflow: hidden;
+    overflow: hidden !important;
 }
 
 .smlms-ld-lesson-header {
@@ -113,10 +144,10 @@ body.smlms-focus-mode-active {
     align-items: center !important;
     gap: 12px !important;
     text-decoration: none !important;
-    color: #00a2e8 !important; /* Force LearnDash Blue Titles */
-    font-weight: 700 !important;
+    color: #00a2e8 !important;
+    font-weight: 600 !important;
     font-size: 14px !important;
-    flex: 1;
+    flex: 1 !important;
 }
 
 .smlms-circle-status {
@@ -125,27 +156,27 @@ body.smlms-focus-mode-active {
     border-radius: 50% !important;
     border: 2px solid #00a2e8 !important;
     display: inline-block !important;
-    flex-shrink: 0;
-    box-sizing: border-box;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
 }
 
 .smlms-ld-toggle-btn {
-    width: 32px !important;
-    height: 32px !important;
-    background-color: #00a2e8 !important; /* Square Cyan Toggle */
+    width: 28px !important;
+    height: 28px !important;
+    background-color: #00a2e8 !important;
     color: #ffffff !important;
     border: none !important;
     border-radius: 3px !important;
-    cursor: pointer;
+    cursor: pointer !important;
     font-size: 10px !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: transform 0.2s !important;
 }
 
 .smlms-ld-toggle-btn.active {
-    transform: rotate(180deg);
+    transform: rotate(180deg) !important;
 }
 
 /* Topics Accordion Container */
@@ -170,9 +201,10 @@ body.smlms-focus-mode-active {
     align-items: center !important;
     gap: 10px !important;
     padding: 8px 10px !important;
-    color: #334155 !important; /* Override Red Theme Links */
+    color: #334155 !important;
     text-decoration: none !important;
     font-size: 13px !important;
+    font-weight: 400 !important;
     border-radius: 4px !important;
 }
 
@@ -183,7 +215,7 @@ body.smlms-focus-mode-active {
 
 .smlms-ld-topic-item.smlms-current-topic .smlms-ld-topic-link {
     color: #00a2e8 !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
 }
 
 .smlms-ld-topic-item.is-completed .smlms-topic-circle {
@@ -192,55 +224,136 @@ body.smlms-focus-mode-active {
 
 /* --- Main Focus Stage Area --- */
 .smlms-focus-main {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    flex-grow: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
 }
 
 .smlms-focus-header {
-    height: 65px;
-    background: #ffffff;
-    border-bottom: 1px solid #e2e8f0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 30px;
-    flex-shrink: 0;
+    height: 65px !important;
+    min-height: 65px !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 30px !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
 }
 
 .smlms-header-progress {
-    width: 260px;
+    width: 260px !important;
 }
 
 .smlms-progress-stats {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    font-weight: 700;
-    color: #64748b;
-    margin-bottom: 6px;
+    display: flex !important;
+    justify-content: space-between !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+    margin-bottom: 6px !important;
 }
 
 .smlms-progress-percent {
-    color: #019e7c;
+    color: #019e7c !important;
 }
 
 .smlms-progress-bar-bg {
-    height: 8px;
-    background: #e2e8f0;
-    border-radius: 4px;
-    overflow: hidden;
+    height: 8px !important;
+    background: #e2e8f0 !important;
+    border-radius: 4px !important;
+    overflow: hidden !important;
 }
 
 .smlms-progress-bar-fill {
-    height: 100%;
-    background: #019e7c;
-    transition: width 0.3s ease;
+    height: 100% !important;
+    background: #019e7c !important;
+    transition: width 0.3s ease !important;
+}
+
+.smlms-header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 15px !important;
+}
+
+.smlms-btn-action {
+    padding: 8px 18px !important;
+    border-radius: 20px !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    cursor: pointer !important;
+    border: none !important;
+}
+
+.smlms-btn-complete {
+    background: #22c55e !important;
+    color: #ffffff !important;
+}
+
+.smlms-btn-complete:disabled {
+    background: #cbd5e1 !important;
+    cursor: not-allowed !important;
+}
+
+.smlms-user-welcome {
+    font-size: 13px !important;
+    color: #475569 !important;
+}
+
+.smlms-user-avatar {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
 }
 
 .smlms-focus-stage {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 30px 50px;
+    flex-grow: 1 !important;
+    overflow-y: auto !important;
+    padding: 30px 50px !important;
+    box-sizing: border-box !important;
+}
+
+.smlms-stage-tabs-header {
+    display: flex !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    margin-bottom: 20px !important;
+}
+
+.smlms-stage-tab-btn {
+    background: none !important;
+    border: none !important;
+    padding: 10px 20px !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #64748b !important;
+    cursor: pointer !important;
+    border-bottom: 2px solid transparent !important;
+    margin-bottom: -2px !important;
+}
+
+.smlms-stage-tab-btn.active {
+    color: #00a2e8 !important;
+    border-bottom-color: #00a2e8 !important;
+    font-weight: 600 !important;
+}
+
+.smlms-stage-tab-pane {
+    display: none !important;
+}
+
+.smlms-stage-tab-pane.active {
+    display: block !important;
+}
+
+.smlms-video-container {
+    position: relative !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    margin-bottom: 20px !important;
 }

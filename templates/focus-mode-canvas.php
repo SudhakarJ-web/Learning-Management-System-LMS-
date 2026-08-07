@@ -1,23 +1,48 @@
 <?php
 /**
- * Focus Mode Master Canvas - Course Name Enforcement
+ * Focus Mode Master Canvas - Sample Lesson Access
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-if (!is_user_logged_in()) {
-    auth_redirect();
+$current_id   = get_the_ID();
+$post_type    = get_post_type($current_id);
+$course_id    = SMLMS_DB::get_parent_course_id($current_id);
+$user_id      = get_current_user_id();
+
+// Sample Lesson Status Check
+$is_sample_lesson = false;
+if ($post_type === 'smlms_lesson') {
+    $is_sample_lesson = get_post_meta($current_id, '_smlms_is_sample', true) === '1';
+} elseif ($post_type === 'smlms_topic') {
+    $parent_lesson_id = get_post_meta($current_id, '_smlms_parent_lesson_id', true);
+    if ($parent_lesson_id) {
+        $is_sample_lesson = get_post_meta($parent_lesson_id, '_smlms_is_sample', true) === '1';
+    }
+}
+
+// Access Guard Check
+$price_type  = get_post_meta($course_id, '_smlms_price_type', true) ?: 'closed';
+$is_enrolled = $user_id ? SMLMS_DB::is_user_enrolled($user_id, $course_id) : false;
+$is_admin    = current_user_can('manage_options');
+$has_access  = $is_enrolled || $is_admin || ($price_type === 'open') || $is_sample_lesson;
+
+if (!$has_access) {
+    wp_redirect(get_permalink($course_id));
+    exit;
 }
 
 $current_user  = wp_get_current_user();
-$current_id    = get_the_ID();
-$course_id     = SMLMS_DB::get_parent_course_id($current_id);
 $course_post   = get_post($course_id);
 $course_title  = $course_post ? $course_post->post_title : get_the_title($current_id);
-
 $avatar_url    = get_avatar_url($current_user->ID, ['size' => 96]);
+
+// Dynamic Cache-Busted CSS URL
+$focus_css_path = SMLMS_PLUGIN_DIR . 'public/css/smlms-focus-mode.css';
+$focus_css_ver  = file_exists($focus_css_path) ? filemtime($focus_css_path) : SMLMS_VERSION;
+$focus_css_url  = SMLMS_PLUGIN_URL . 'public/css/smlms-focus-mode.css?ver=' . $focus_css_ver;
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -25,35 +50,57 @@ $avatar_url    = get_avatar_url($current_user->ID, ['size' => 96]);
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php wp_title('|', true, 'right'); ?></title>
+    
+    <link rel="stylesheet" id="smlms-focus-mode-css" href="<?php echo esc_url($focus_css_url); ?>" type="text/css" media="all" />
+    
     <?php wp_head(); ?>
 
-    <style id="smlms-embedded-canvas-css">
+    <style id="smlms-focus-critical-layout-reset">
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
         html, body.smlms-focus-mode-active {
             margin: 0 !important;
             padding: 0 !important;
-            height: 100vh !important;
             width: 100vw !important;
+            height: 100vh !important;
             overflow: hidden !important;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
             background-color: #ffffff !important;
             color: #2d3748 !important;
         }
 
-        .smlms-focus-wrapper, .smlms-focus-container {
+        body.smlms-focus-mode-active ul,
+        body.smlms-focus-mode-active li {
+            list-style: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        body.smlms-focus-mode-active a {
+            text-decoration: none !important;
+        }
+
+        .smlms-focus-wrapper, 
+        .smlms-focus-container {
             display: flex !important;
+            flex-direction: row !important;
             width: 100vw !important;
             height: 100vh !important;
             overflow: hidden !important;
+            box-sizing: border-box !important;
         }
 
         .smlms-focus-sidebar {
             width: 380px !important;
             min-width: 380px !important;
+            max-width: 380px !important;
             background-color: #f8fafc !important;
             border-right: 1px solid #cbd5e1 !important;
             display: flex !important;
             flex-direction: column !important;
             height: 100vh !important;
+            flex-shrink: 0 !important;
+            overflow: hidden !important;
             box-sizing: border-box !important;
             transition: margin-left 0.3s ease !important;
         }
@@ -71,6 +118,7 @@ $avatar_url    = get_avatar_url($current_user->ID, ['size' => 96]);
             justify-content: space-between !important;
             gap: 12px !important;
             box-sizing: border-box !important;
+            flex-shrink: 0 !important;
         }
 
         .smlms-course-header-left {
@@ -88,7 +136,7 @@ $avatar_url    = get_avatar_url($current_user->ID, ['size' => 96]);
         .smlms-course-header-title {
             color: #ffffff !important;
             text-decoration: none !important;
-            font-weight: 700 !important;
+            font-weight: 600 !important;
             font-size: 15px !important;
             line-height: 1.3 !important;
         }
@@ -134,6 +182,7 @@ $avatar_url    = get_avatar_url($current_user->ID, ['size' => 96]);
             justify-content: space-between !important;
             padding: 0 30px !important;
             box-sizing: border-box !important;
+            flex-shrink: 0 !important;
         }
 
         .smlms-header-progress {
@@ -144,7 +193,7 @@ $avatar_url    = get_avatar_url($current_user->ID, ['size' => 96]);
             display: flex !important;
             justify-content: space-between !important;
             font-size: 12px !important;
-            font-weight: 700 !important;
+            font-weight: 600 !important;
             color: #64748b !important;
             margin-bottom: 6px !important;
         }
@@ -256,7 +305,7 @@ $avatar_url    = get_avatar_url($current_user->ID, ['size' => 96]);
 
                 <div class="smlms-header-actions">
                     <button type="button" class="smlms-btn-action smlms-btn-complete" id="smlms-mark-complete-btn" disabled>Mark Complete</button>
-                    <span class="smlms-user-welcome">Hello, <strong><?php echo esc_html($current_user->display_name); ?></strong>!</span>
+                    <span class="smlms-user-welcome">Hello, <strong><?php echo esc_html($current_user->ID ? $current_user->display_name : 'Visitor'); ?></strong>!</span>
                     <img src="<?php echo esc_url($avatar_url); ?>" class="smlms-user-avatar" alt="Avatar">
                 </div>
             </header>
@@ -272,6 +321,20 @@ $avatar_url    = get_avatar_url($current_user->ID, ['size' => 96]);
 
     </div>
 </div>
+
+<script>
+jQuery(document).ready(function($) {
+    $('#smlms-sidebar-toggle').on('click', function() {
+        const sidebar = $('#smlms-focus-sidebar');
+        sidebar.toggleClass('collapsed');
+        if (sidebar.hasClass('collapsed')) {
+            $(this).html('&gt;');
+        } else {
+            $(this).html('&lt;');
+        }
+    });
+});
+</script>
 
 <?php wp_footer(); ?>
 </body>

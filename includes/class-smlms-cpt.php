@@ -126,14 +126,11 @@ class SMLMS_CPT {
         add_meta_box('smlms_sidebar_lessons_box', 'Lessons', [$this, 'render_sidebar_lessons_box'], 'smlms_course', 'side', 'default');
         add_meta_box('smlms_sidebar_topics_box', 'Topics', [$this, 'render_sidebar_topics_box'], 'smlms_course', 'side', 'default');
 
-        // Lesson & Topic Boxes
+        // Lesson & Topic Custom Meta Boxes
         add_meta_box('smlms_custom_item_meta_box', 'Sabin Mathew Custom Meta', [$this, 'render_custom_item_meta_box'], ['smlms_lesson', 'smlms_topic'], 'normal', 'high');
         add_meta_box('smlms_display_content_options', 'Display and Content Options', [$this, 'render_display_content_options'], ['smlms_lesson', 'smlms_topic'], 'normal', 'high');
     }
 
-    /**
-     * Render LearnDash Replica "Course Enrollment" Settings
-     */
     public function render_course_enrollment_box($post) {
         wp_nonce_field('smlms_save_enrollment_meta', 'smlms_enrollment_nonce');
 
@@ -145,7 +142,6 @@ class SMLMS_CPT {
             <p class="smlms-panel-subheading">Controls how students gain access to the course</p>
 
             <div class="smlms-radio-options-list">
-                <!-- Open -->
                 <label class="smlms-enroll-radio-row">
                     <input type="radio" name="smlms_price_type" value="open" <?php checked($price_type, 'open'); ?> class="smlms-enroll-mode-radio">
                     <div>
@@ -154,7 +150,6 @@ class SMLMS_CPT {
                     </div>
                 </label>
 
-                <!-- Free -->
                 <label class="smlms-enroll-radio-row">
                     <input type="radio" name="smlms_price_type" value="free" <?php checked($price_type, 'free'); ?> class="smlms-enroll-mode-radio">
                     <div>
@@ -163,7 +158,6 @@ class SMLMS_CPT {
                     </div>
                 </label>
 
-                <!-- Buy Now -->
                 <label class="smlms-enroll-radio-row">
                     <input type="radio" name="smlms_price_type" value="buy_now" <?php checked($price_type, 'buy_now'); ?> class="smlms-enroll-mode-radio">
                     <div>
@@ -172,7 +166,6 @@ class SMLMS_CPT {
                     </div>
                 </label>
 
-                <!-- Recurring -->
                 <label class="smlms-enroll-radio-row">
                     <input type="radio" name="smlms_price_type" value="recurring" <?php checked($price_type, 'recurring'); ?> class="smlms-enroll-mode-radio">
                     <div>
@@ -181,7 +174,6 @@ class SMLMS_CPT {
                     </div>
                 </label>
 
-                <!-- Closed -->
                 <label class="smlms-enroll-radio-row">
                     <input type="radio" name="smlms_price_type" value="closed" <?php checked($price_type, 'closed'); ?> class="smlms-enroll-mode-radio">
                     <div>
@@ -191,7 +183,6 @@ class SMLMS_CPT {
                 </label>
             </div>
 
-            <!-- Sub-fields for Price & Button URL -->
             <div id="smlms-enroll-subfields" class="smlms-enroll-subfields-box" style="<?php echo in_array($price_type, ['buy_now', 'recurring', 'closed']) ? '' : 'display:none;'; ?>">
                 <div class="smlms-form-row">
                     <label><strong>Course Price</strong></label>
@@ -206,21 +197,16 @@ class SMLMS_CPT {
         <?php
     }
 
-    /**
-     * Render LearnDash Replica "Course Students" Dual List Box
-     */
     public function render_course_students_box($post) {
         global $wpdb;
         wp_nonce_field('smlms_save_students_meta', 'smlms_students_nonce');
 
-        // Fetch enrolled user IDs from DB table
         $enrolled_ids = $wpdb->get_col($wpdb->prepare(
             "SELECT user_id FROM {$wpdb->prefix}smlms_enrollments WHERE course_id = %d AND status = 'active'",
             $post->ID
         ));
         if (!is_array($enrolled_ids)) $enrolled_ids = [];
 
-        // All Users Query
         $all_users = get_users(['number' => 500, 'orderby' => 'display_name', 'order' => 'ASC']);
 
         $unassigned_users = [];
@@ -239,7 +225,6 @@ class SMLMS_CPT {
             <p class="smlms-panel-subheading">Students enrolled via Groups using this Course are excluded from the listings below and should be managed via the Group admin screen.</p>
 
             <div class="smlms-dual-selector-wrapper">
-                <!-- Left Box: All Unassigned Users -->
                 <div class="smlms-selector-column">
                     <input type="text" class="smlms-user-search-input widefat" placeholder="Search All Course Users..." data-target="#smlms-unassigned-users-select">
                     <select id="smlms-unassigned-users-select" class="smlms-dual-listbox" multiple size="10">
@@ -249,13 +234,11 @@ class SMLMS_CPT {
                     </select>
                 </div>
 
-                <!-- Middle Action Controls -->
                 <div class="smlms-selector-actions">
                     <button type="button" id="smlms-btn-assign-users" class="button button-secondary" title="Assign Selected">&rarr;</button>
                     <button type="button" id="smlms-btn-remove-users" class="button button-secondary" title="Remove Selected">&larr;</button>
                 </div>
 
-                <!-- Right Box: Assigned Course Users -->
                 <div class="smlms-selector-column">
                     <input type="text" class="smlms-user-search-input widefat" placeholder="Search Assigned Course Users..." data-target="#smlms-assigned-users-select">
                     <select id="smlms-assigned-users-select" class="smlms-dual-listbox" multiple size="10">
@@ -266,7 +249,6 @@ class SMLMS_CPT {
                 </div>
             </div>
 
-            <!-- Hidden Enrolled IDs array -->
             <div id="smlms-assigned-hidden-inputs">
                 <?php foreach ($assigned_users as $uid => $uname): ?>
                     <input type="hidden" name="smlms_enrolled_user_ids[]" value="<?php echo $uid; ?>">
@@ -346,8 +328,21 @@ class SMLMS_CPT {
         wp_nonce_field('smlms_save_custom_item_meta', 'smlms_custom_item_nonce');
         $duration     = get_post_meta($post->ID, '_smlms_duration', true);
         $content_type = get_post_meta($post->ID, '_smlms_content_type', true) ?: 'video';
+        $is_sample    = get_post_meta($post->ID, '_smlms_is_sample', true) ?: '0';
+        $is_lesson    = ($post->post_type === 'smlms_lesson');
         ?>
         <table class="form-table smlms-custom-meta-table">
+            <?php if ($is_lesson): ?>
+            <tr>
+                <th><label for="smlms_is_sample">Sample Lesson</label></th>
+                <td>
+                    <label>
+                        <input type="checkbox" id="smlms_is_sample" name="smlms_is_sample" value="1" <?php checked($is_sample, '1'); ?>>
+                        <strong>Allow Sample Preview</strong> (Non-enrolled users can view this lesson and all its topics in Focus Mode)
+                    </label>
+                </td>
+            </tr>
+            <?php endif; ?>
             <tr>
                 <th><label for="smlms_duration">Estimated Duration</label></th>
                 <td><input type="text" id="smlms_duration" name="smlms_duration" value="<?php echo esc_attr($duration); ?>" placeholder="e.g. 2.24 or 7.03" class="regular-text"></td>
@@ -526,9 +521,6 @@ class SMLMS_CPT {
         <?php
     }
 
-    /**
-     * Non-Recursive Safe Post Saving
-     */
     public function save_meta_box_data($post_id) {
         global $wpdb;
 
@@ -546,10 +538,8 @@ class SMLMS_CPT {
         if (isset($_POST['smlms_students_nonce']) && wp_verify_nonce($_POST['smlms_students_nonce'], 'smlms_save_students_meta')) {
             $assigned_ids = isset($_POST['smlms_enrolled_user_ids']) && is_array($_POST['smlms_enrolled_user_ids']) ? array_map('intval', $_POST['smlms_enrolled_user_ids']) : [];
 
-            // Clear current enrollments for this course
             $wpdb->delete($wpdb->prefix . 'smlms_enrollments', ['course_id' => $post_id], ['%d']);
 
-            // Insert newly assigned students
             foreach ($assigned_ids as $uid) {
                 $wpdb->insert(
                     $wpdb->prefix . 'smlms_enrollments',
@@ -563,7 +553,6 @@ class SMLMS_CPT {
                 );
             }
 
-            // Sync enrolled count
             update_post_meta($post_id, '_smlms_students_enrolled', count($assigned_ids));
         }
 
@@ -577,8 +566,11 @@ class SMLMS_CPT {
             }
         }
 
-        // 4. Custom Item Meta (Lessons/Topics)
+        // 4. Custom Item Meta (Lessons only for Sample status, plus Duration & Content Type)
         if (isset($_POST['smlms_custom_item_nonce']) && wp_verify_nonce($_POST['smlms_custom_item_nonce'], 'smlms_save_custom_item_meta')) {
+            if (get_post_type($post_id) === 'smlms_lesson') {
+                update_post_meta($post_id, '_smlms_is_sample', isset($_POST['smlms_is_sample']) ? '1' : '0');
+            }
             if (isset($_POST['smlms_duration'])) update_post_meta($post_id, '_smlms_duration', sanitize_text_field($_POST['smlms_duration']));
             if (isset($_POST['smlms_content_type'])) update_post_meta($post_id, '_smlms_content_type', sanitize_text_field($_POST['smlms_content_type']));
         }
