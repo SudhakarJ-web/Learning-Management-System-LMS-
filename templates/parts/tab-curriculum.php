@@ -5,8 +5,9 @@
 
 if (!defined('ABSPATH')) exit;
 
-$hierarchy  = $context['hierarchy'] ?? [];
-$has_access = $context['has_access'] ?? false;
+$hierarchy   = $context['hierarchy'] ?? [];
+$has_access  = $context['has_access'] ?? false;
+$access_type = $context['access_type'] ?? 'closed';
 ?>
 
 <div id="tab-curriculum" class="smlms-course-tab-pane active">
@@ -31,7 +32,9 @@ $has_access = $context['has_access'] ?? false;
                     $topics               = $lesson['topics'] ?? [];
                     $topic_count          = count($topics);
                     $is_sample_l          = get_post_meta($lesson_id, '_smlms_is_sample', true) === '1';
-                    $can_view_lesson      = $has_access || $is_sample_l;
+                    
+                    // Unlocked for Open courses, enrolled users, or sample lessons
+                    $can_view_lesson      = ($access_type === 'open') || $has_access || $is_sample_l;
                     $is_standalone_lesson = ($topic_count === 0);
                     
                     // Normalize Content Type
@@ -64,7 +67,7 @@ $has_access = $context['has_access'] ?? false;
                             </div>
 
                             <div class="smlms-lesson-meta-wrap">
-                                <?php if ($is_sample_l): ?>
+                                <?php if ($is_sample_l && $access_type !== 'open'): ?>
                                     <span class="smlms-badge-sample">SAMPLE LESSON</span>
                                 <?php endif; ?>
 
@@ -76,7 +79,7 @@ $has_access = $context['has_access'] ?? false;
                                     <span class="smlms-topic-duration"><?php echo esc_html($lesson_duration); ?></span>
                                 <?php endif; ?>
 
-                                <?php if (!$can_view_lesson && !$has_access): ?>
+                                <?php if (!$can_view_lesson): ?>
                                     <div class="smlms-tooltip-holder">
                                         <span class="dashicons dashicons-lock smlms-lock-icon"></span>
                                         <span class="smlms-tooltip-text">You don't currently have access to this content</span>
@@ -97,7 +100,7 @@ $has_access = $context['has_access'] ?? false;
                                         $topic_url         = $topic['permalink'];
                                         $duration          = $topic['duration'] ?? '5.00';
                                         
-                                        $can_view_topic    = $has_access || $is_sample_l;
+                                        $can_view_topic    = ($access_type === 'open') || $has_access || $is_sample_l;
                                         
                                         $raw_t_type        = strtolower(trim((string) get_post_meta($topic_id, '_smlms_content_type', true)));
                                         $topic_type        = ($raw_t_type === 'presentation') ? 'presentation' : 'video';
@@ -123,7 +126,7 @@ $has_access = $context['has_access'] ?? false;
                                             <div class="smlms-topic-meta-wrap">
                                                 <span class="smlms-topic-duration"><?php echo esc_html($duration); ?></span>
 
-                                                <?php if (!$can_view_topic && !$has_access): ?>
+                                                <?php if (!$can_view_topic): ?>
                                                     <div class="smlms-tooltip-holder">
                                                         <span class="dashicons dashicons-lock smlms-lock-icon"></span>
                                                         <span class="smlms-tooltip-text">You don't currently have access to this content</span>

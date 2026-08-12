@@ -308,3 +308,265 @@ span.dashicons {
     background: #8e1246 !important;
     border-color: #8e1246 !important;
 }
+
+/* --- Disabled Access Card Styling --- */
+.smlms-access-card.disabled-card {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f8fafc;
+    border-color: #e2e8f0 !important;
+}
+
+.smlms-access-card.disabled-card:hover {
+    box-shadow: none !important;
+    border-color: #e2e8f0 !important;
+}
+
+.smlms-access-card.disabled-card input[type="radio"] {
+    cursor: not-allowed;
+}
+
+/* --- Display & Content Options Meta Box Styling --- */
+.smlms-display-options-container {
+    padding: 10px 5px !important;
+}
+
+.smlms-display-options-subtitle {
+    font-size: 13px !important;
+    font-style: italic !important;
+    color: #64748b !important;
+    margin: 0 0 20px 0 !important;
+}
+
+.smlms-meta-section-row {
+    margin-bottom: 25px !important;
+}
+
+.smlms-meta-header-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-bottom: 12px !important;
+}
+
+.smlms-meta-title {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    min-width: 120px !important;
+}
+
+.smlms-help-tooltip {
+    color: #94a3b8 !important;
+    font-size: 16px !important;
+    width: 16px !important;
+    height: 16px !important;
+    cursor: help !important;
+}
+
+/* LearnDash Style Toggle Switch */
+.smlms-toggle-switch {
+    position: relative !important;
+    display: inline-block !important;
+    width: 44px !important;
+    height: 22px !important;
+    margin: 0 4px !important;
+    flex-shrink: 0 !important;
+}
+
+.smlms-toggle-switch input {
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+.smlms-toggle-slider {
+    position: absolute !important;
+    cursor: pointer !important;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #cbd5e1 !important;
+    transition: 0.2s !important;
+    border-radius: 22px !important;
+}
+
+.smlms-toggle-slider:before {
+    position: absolute !important;
+    content: "" !important;
+    height: 16px !important;
+    width: 16px !important;
+    left: 3px !important;
+    bottom: 3px !important;
+    background-color: white !important;
+    transition: 0.2s !important;
+    border-radius: 50% !important;
+}
+
+.smlms-toggle-switch input:checked + .smlms-toggle-slider {
+    background-color: #00a2e8 !important;
+}
+
+.smlms-toggle-switch input:checked + .smlms-toggle-slider:before {
+    transform: translateX(22px) !important;
+}
+
+.smlms-toggle-label-text {
+    font-size: 13px !important;
+    color: #475569 !important;
+    font-weight: 400 !important;
+}
+
+/* Sub-Option Indented Box */
+.smlms-sub-option-box {
+    margin-left: 20px !important;
+    padding: 18px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 6px !important;
+}
+
+.smlms-sub-field-row {
+    margin-bottom: 18px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+}
+
+.smlms-sub-field-row:last-child {
+    margin-bottom: 0 !important;
+}
+
+.smlms-sub-field-label {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+}
+
+.smlms-admin-textarea {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+}
+
+.smlms-radio-block {
+    display: block !important;
+    margin-bottom: 10px !important;
+    cursor: pointer !important;
+}
+
+.smlms-radio-block input[type="radio"] {
+    margin-right: 6px !important;
+}
+
+.smlms-radio-block strong {
+    font-size: 13px !important;
+    color: #1e293b !important;
+}
+
+.smlms-radio-block .description {
+    margin: 2px 0 0 24px !important;
+    font-size: 12px !important;
+    color: #64748b !important;
+}
+
+.smlms-inline-toggle {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+/* --- Dual Listbox Course Students Section --- */
+.smlms-dual-listbox-wrapper {
+    padding: 10px 0;
+}
+
+.smlms-dual-listbox-notice {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 18px;
+}
+
+.smlms-dual-listbox-grid {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    max-width: 900px;
+}
+
+.smlms-listbox-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.smlms-listbox-search {
+    width: 100% !important;
+    padding: 8px 12px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    font-size: 13px !important;
+}
+
+.smlms-listbox-select {
+    width: 100% !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    padding: 6px !important;
+    font-size: 13px !important;
+    height: 260px !important;
+}
+
+.smlms-listbox-actions,
+.smlms-user-listbox-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+}
+
+.smlms-circle-arrow-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #000000;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s ease;
+}
+
+.smlms-circle-arrow-btn:hover {
+    background-color: #333333;
+}
+
+/* User Profile Course Access Styles */
+.smlms-user-dual-listbox-grid {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    max-width: 750px;
+    margin-top: 10px;
+}
+
+.smlms-user-listbox-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.smlms-sub-label {
+    font-weight: 600;
+    font-size: 13px;
+    color: #1e293b;
+}
+
+.smlms-btn-square {
+    padding: 4px 12px !important;
+    font-weight: 700 !important;
+}

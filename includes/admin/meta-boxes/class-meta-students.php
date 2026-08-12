@@ -1,6 +1,6 @@
 <?php
 /**
- * Course Assigned Students Dual List Box Meta Box
+ * Course Students Admin Meta Box (Dual Listbox Interface)
  */
 
 if (!defined('ABSPATH')) {
@@ -10,71 +10,138 @@ if (!defined('ABSPATH')) {
 class SMLMS_Meta_Students {
 
     public static function init() {
-        add_action('add_meta_boxes', [__CLASS__, 'register']);
+        add_action('add_meta_boxes', [__CLASS__, 'register_meta_box']);
     }
 
-    public static function register() {
-        add_meta_box('smlms_course_students_box', 'Course Students', [__CLASS__, 'render'], 'smlms_course', 'normal', 'default');
+    public static function register_meta_box() {
+        add_meta_box(
+            'smlms_course_students_meta',
+            'Course Students',
+            [__CLASS__, 'render_meta_box'],
+            'smlms_course',
+            'normal',
+            'default' // Set to 'default' so it renders below Course Access & Enrollment Settings ('high')
+        );
     }
 
-    public static function render($post) {
-        global $wpdb;
-        wp_nonce_field('smlms_save_students_meta', 'smlms_students_nonce');
+    public static function render_meta_box($post) {
+        wp_nonce_field('smlms_course_students_nonce_action', 'smlms_course_students_nonce');
 
-        $enrolled_ids = $wpdb->get_col($wpdb->prepare(
-            "SELECT user_id FROM {$wpdb->prefix}smlms_enrollments WHERE course_id = %d AND status = 'active'",
-            $post->ID
-        ));
-        if (!is_array($enrolled_ids)) $enrolled_ids = [];
+        $course_id         = $post->ID;
+        $enrolled_user_ids = SMLMS_DB::get_enrolled_user_ids($course_id);
 
-        $all_users = get_users(['number' => 500, 'orderby' => 'display_name', 'order' => 'ASC']);
+        // Fetch all WordPress users
+        $all_users = get_users([
+            'orderby' => 'display_name',
+            'order'   => 'ASC',
+            'fields'  => ['ID', 'display_name', 'user_login', 'user_email']
+        ]);
 
         $unassigned_users = [];
         $assigned_users   = [];
 
-        foreach ($all_users as $u) {
-            $user_info = $u->display_name . ' (' . $u->user_login . ')';
-            if (in_array($u->ID, $enrolled_ids)) {
-                $assigned_users[$u->ID] = $user_info;
+        foreach ($all_users as $user) {
+            $is_enrolled = in_array($user->ID, $enrolled_user_ids);
+            $label       = sprintf('%s (%s)', $user->display_name, $user->user_login);
+
+            if ($is_enrolled) {
+                $assigned_users[$user->ID] = $label;
             } else {
-                $unassigned_users[$u->ID] = $user_info;
+                $unassigned_users[$user->ID] = $label;
             }
         }
+
+        $assigned_ids_str = implode(',', array_keys($assigned_users));
         ?>
-        <div class="smlms-students-panel">
-            <p class="smlms-panel-subheading">Students enrolled via Groups using this Course are excluded from the listings below and should be managed via the Group admin screen.</p>
 
-            <div class="smlms-dual-selector-wrapper">
-                <div class="smlms-selector-column">
-                    <input type="text" class="smlms-user-search-input widefat" placeholder="Search All Course Users..." data-target="#smlms-unassigned-users-select">
-                    <select id="smlms-unassigned-users-select" class="smlms-dual-listbox" multiple size="10">
-                        <?php foreach ($unassigned_users as $uid => $uname): ?>
-                            <option value="<?php echo $uid; ?>"><?php echo esc_html($uname); ?></option>
+        <div class="smlms-dual-listbox-wrapper">
+            <p class="smlms-dual-listbox-notice">
+                Students enrolled via Groups using this Course are excluded from the listings below and should be managed via the Group admin screen.
+            </p>
+
+            <input type="hidden" name="smlms_assigned_user_ids" id="smlms_assigned_user_ids" value="<?php echo esc_attr($assigned_ids_str); ?>">
+
+            <div class="smlms-dual-listbox-grid">
+                
+                <!-- Left Box: All Unassigned Users -->
+                <div class="smlms-listbox-column">
+                    <input type="text" id="smlms_search_all_users" class="smlms-listbox-search" placeholder="Search All Course Users...">
+                    <select id="smlms_all_users_select" class="smlms-listbox-select" multiple size="12">
+                        <?php foreach ($unassigned_users as $uid => $ulabel): ?>
+                            <option value="<?php echo esc_attr($uid); ?>"><?php echo esc_html($ulabel); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
 
-                <div class="smlms-selector-actions">
-                    <button type="button" id="smlms-btn-assign-users" class="button button-secondary" title="Assign Selected">&rarr;</button>
-                    <button type="button" id="smlms-btn-remove-users" class="button button-secondary" title="Remove Selected">&larr;</button>
+                <!-- Center: Transfer Arrows -->
+                <div class="smlms-listbox-actions">
+                    <button type="button" id="smlms_btn_assign_user" class="smlms-circle-arrow-btn" title="Assign Access">
+                        &rarr;
+                    </button>
+                    <button type="button" id="smlms_btn_unassign_user" class="smlms-circle-arrow-btn" title="Revoke Access">
+                        &larr;
+                    </button>
                 </div>
 
-                <div class="smlms-selector-column">
-                    <input type="text" class="smlms-user-search-input widefat" placeholder="Search Assigned Course Users..." data-target="#smlms-assigned-users-select">
-                    <select id="smlms-assigned-users-select" class="smlms-dual-listbox" multiple size="10">
-                        <?php foreach ($assigned_users as $uid => $uname): ?>
-                            <option value="<?php echo $uid; ?>"><?php echo esc_html($uname); ?></option>
+                <!-- Right Box: Assigned Course Users -->
+                <div class="smlms-listbox-column">
+                    <input type="text" id="smlms_search_assigned_users" class="smlms-listbox-search" placeholder="Search Assigned Course Users...">
+                    <select id="smlms_assigned_users_select" class="smlms-listbox-select" multiple size="12">
+                        <?php foreach ($assigned_users as $uid => $ulabel): ?>
+                            <option value="<?php echo esc_attr($uid); ?>"><?php echo esc_html($ulabel); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
-            </div>
 
-            <div id="smlms-assigned-hidden-inputs">
-                <?php foreach ($assigned_users as $uid => $uname): ?>
-                    <input type="hidden" name="smlms_enrolled_user_ids[]" value="<?php echo $uid; ?>">
-                <?php endforeach; ?>
             </div>
         </div>
+
+        <script>
+        jQuery(document).ready(function($) {
+            
+            function updateAssignedHiddenInput() {
+                var assignedIds = [];
+                $('#smlms_assigned_users_select option').each(function() {
+                    assignedIds.push($(this).val());
+                });
+                $('#smlms_assigned_user_ids').val(assignedIds.join(','));
+            }
+
+            // Assign Access (Move Right ->)
+            $('#smlms_btn_assign_user').on('click', function() {
+                $('#smlms_all_users_select option:selected').each(function() {
+                    $(this).appendTo('#smlms_assigned_users_select');
+                });
+                updateAssignedHiddenInput();
+            });
+
+            // Revoke Access (Move Left <-)
+            $('#smlms_btn_unassign_user').on('click', function() {
+                $('#smlms_assigned_users_select option:selected').each(function() {
+                    $(this).appendTo('#smlms_all_users_select');
+                });
+                updateAssignedHiddenInput();
+            });
+
+            // Live Search Filter - All Users
+            $('#smlms_search_all_users').on('keyup', function() {
+                var term = $(this).val().toLowerCase();
+                $('#smlms_all_users_select option').each(function() {
+                    var txt = $(this).text().toLowerCase();
+                    $(this).toggle(txt.indexOf(term) > -1);
+                });
+            });
+
+            // Live Search Filter - Assigned Users
+            $('#smlms_search_assigned_users').on('keyup', function() {
+                var term = $(this).val().toLowerCase();
+                $('#smlms_assigned_users_select option').each(function() {
+                    var txt = $(this).text().toLowerCase();
+                    $(this).toggle(txt.indexOf(term) > -1);
+                });
+            });
+        });
+        </script>
         <?php
     }
 }

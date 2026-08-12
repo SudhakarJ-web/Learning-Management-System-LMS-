@@ -3,7 +3,7 @@
  * Plugin Name: Sabin Mathew LMS
  * Plugin URI:  https://sabinmathew.com/
  * Description: Custom Lightweight LMS for Sabin Mathew Engineering Courses.
- * Version:     1.0.7
+ * Version:     1.0.9
  * Author:      Sabin Mathew
  * Text Domain: sabinmathew-lms
  */
@@ -23,6 +23,8 @@ require_once SMLMS_PLUGIN_DIR . 'includes/class-smlms-focus-mode.php';
 require_once SMLMS_PLUGIN_DIR . 'includes/class-smlms-activator.php';
 require_once SMLMS_PLUGIN_DIR . 'includes/class-smlms-payments.php';
 require_once SMLMS_PLUGIN_DIR . 'includes/class-smlms-rest-api.php';
+require_once SMLMS_PLUGIN_DIR . 'includes/class-smlms-payment-handler.php';
+require_once SMLMS_PLUGIN_DIR . 'includes/class-smlms-dashboard.php';
 
 // --- 2. Post Types & Taxonomies ---
 require_once SMLMS_PLUGIN_DIR . 'includes/cpts/class-smlms-post-types.php';
@@ -34,6 +36,7 @@ if (is_admin()) {
     require_once SMLMS_PLUGIN_DIR . 'includes/admin/class-smlms-admin-columns.php';
     require_once SMLMS_PLUGIN_DIR . 'includes/admin/class-smlms-meta-saver.php';
     require_once SMLMS_PLUGIN_DIR . 'includes/admin/class-smlms-user-profile.php';
+    require_once SMLMS_PLUGIN_DIR . 'includes/admin/class-user-course-access.php';
 
     // Meta Box Renderers
     require_once SMLMS_PLUGIN_DIR . 'includes/admin/meta-boxes/class-meta-course-builder.php';
@@ -118,3 +121,21 @@ function smlms_enqueue_admin_assets($hook) {
 
 // --- 6. Activation Hooks ---
 register_activation_hook(__FILE__, ['SMLMS_Activator', 'activate']);
+
+// --- Free Instant Enrollment Handler ---
+add_action('init', 'smlms_handle_free_enrollment');
+function smlms_handle_free_enrollment() {
+    if (isset($_GET['smlms_action']) && $_GET['smlms_action'] === 'free_enroll') {
+        $course_id = intval($_GET['course_id'] ?? 0);
+        $user_id   = get_current_user_id();
+
+        if ($course_id > 0 && $user_id > 0 && wp_verify_nonce($_GET['_wpnonce'] ?? '', 'smlms_free_enroll_' . $course_id)) {
+            $access_type = get_post_meta($course_id, '_smlms_access_type', true);
+            if ($access_type === 'free') {
+                SMLMS_DB::enroll_student($user_id, $course_id);
+                wp_safe_redirect(get_permalink($course_id));
+                exit;
+            }
+        }
+    }
+}

@@ -28,37 +28,26 @@ class SMLMS_Meta_Course_Details {
         wp_nonce_field('smlms_course_details_nonce_action', 'smlms_course_details_nonce');
 
         $access_type = get_post_meta($post->ID, '_smlms_access_type', true) ?: 'closed';
-        $price       = get_post_meta($post->ID, '_smlms_price', true) ?: '25';
-        $button_url  = get_post_meta($post->ID, '_smlms_custom_checkout_url', true) ?: '';
+        $price       = get_post_meta($post->ID, '_smlms_price', true);
 
+        $button_url  = get_post_meta($post->ID, '_smlms_custom_checkout_url', true) ?: '';
         if (empty($button_url)) {
             $button_url = get_post_meta($post->ID, '_smlms_button_url', true) ?: '';
         }
 
+        // Active Options Only (Buy Now & Recurring Removed)
         $options = [
             'open' => [
                 'title' => 'Open',
                 'badge' => 'Unprotected',
-                'desc'  => 'The course is public. Any student can view content without logging in or enrolling.',
+                'desc'  => 'The course is public. Any student can view content in Focus Mode without logging in or enrolling.',
                 'icon'  => 'dashicons-lock'
             ],
             'free' => [
                 'title' => 'Free',
                 'badge' => 'Registration Required',
-                'desc'  => 'The course is free, but students must register and enroll to access content.',
+                'desc'  => 'The course is free, but students must register/login and enroll to access content.',
                 'icon'  => 'dashicons-welcome-write-blog'
-            ],
-            'buy_now' => [
-                'title' => 'Buy Now',
-                'badge' => 'One-time Payment',
-                'desc'  => 'Protected via gateway. Students purchase a one-time fee for lifetime access.',
-                'icon'  => 'dashicons-cart'
-            ],
-            'recurring' => [
-                'title' => 'Recurring',
-                'badge' => 'Subscription',
-                'desc'  => 'Protected via gateway. Students pay a recurring subscription fee for access.',
-                'icon'  => 'dashicons-update'
             ],
             'closed' => [
                 'title' => 'Closed',
@@ -73,8 +62,10 @@ class SMLMS_Meta_Course_Details {
             <p class="smlms-access-subtitle">Select how students gain access to this course:</p>
 
             <div class="smlms-access-grid">
-                <?php foreach ($options as $key => $opt): ?>
-                    <label class="smlms-access-card <?php echo ($access_type === $key) ? 'active' : ''; ?>">
+                <?php foreach ($options as $key => $opt): 
+                    $is_active = ($access_type === $key);
+                ?>
+                    <label class="smlms-access-card <?php echo $is_active ? 'active' : ''; ?>">
                         <input type="radio" name="_smlms_access_type" value="<?php echo esc_attr($key); ?>" <?php checked($access_type, $key); ?>>
                         <div class="smlms-access-card-inner">
                             <div class="smlms-access-card-header">
@@ -90,7 +81,8 @@ class SMLMS_Meta_Course_Details {
 
             <div class="smlms-access-field-row">
                 <label for="_smlms_price" class="smlms-field-label">Course Price ($)</label>
-                <input type="text" id="_smlms_price" name="_smlms_price" value="<?php echo esc_attr($price); ?>" class="widefat smlms-input">
+                <input type="text" id="_smlms_price" name="_smlms_price" value="<?php echo esc_attr($price); ?>" class="widefat smlms-input" placeholder="e.g. 230">
+                <span class="description">Enter any price amount. Applies when Closed or custom integration mode is active.</span>
             </div>
 
             <div class="smlms-access-field-row">

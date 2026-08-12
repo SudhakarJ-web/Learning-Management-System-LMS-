@@ -1,65 +1,109 @@
 <?php
 /**
- * Focus Mode Sidebar Curriculum Tree Part (LearnDash Style)
+ * Focus Mode - Sidebar Hierarchy Tree Template
  */
 
 if (!defined('ABSPATH')) exit;
 
-$current_post_id = get_the_ID();
-$course_id       = isset($course_id) && $course_id ? $course_id : SMLMS_DB::get_parent_course_id($current_post_id);
+$current_page_id = get_the_ID();
+$course_id       = $context['course_id'] ?? SMLMS_DB::get_parent_course_id($current_page_id);
 $user_id         = get_current_user_id();
+$is_enrolled     = $user_id ? SMLMS_DB::is_user_enrolled($user_id, $course_id) : false;
+$access_type     = $course_id ? (get_post_meta($course_id, '_smlms_access_type', true) ?: 'closed') : 'closed';
 $hierarchy       = $course_id ? SMLMS_DB::get_course_hierarchy($course_id, $user_id) : [];
 ?>
 
 <div class="smlms-sidebar-tree-wrapper">
-    <?php if (empty($hierarchy)): ?>
-        <p style="padding: 15px; color: #64748b; font-size: 13px;">No curriculum steps available.</p>
-    <?php else: ?>
-        <div class="smlms-tree-lesson-cards">
+    <?php if (!empty($hierarchy)): ?>
+        <ul class="smlms-sidebar-nav-list">
             <?php foreach ($hierarchy as $l_index => $lesson): 
-                $is_current_lesson = ($lesson['lesson_id'] == $current_post_id);
-                $has_topics        = !empty($lesson['topics']);
-                $is_active_branch  = $is_current_lesson;
-
-                if ($has_topics && !$is_active_branch) {
-                    foreach ($lesson['topics'] as $topic) {
-                        if ($topic['id'] == $current_post_id) {
-                            $is_active_branch = true;
+                $lesson_id            = $lesson['lesson_id'];
+                $lesson_title         = $lesson['lesson_title'];
+                $lesson_url           = $lesson['permalink'];
+                $topics               = $lesson['topics'] ?? [];
+                $has_topics           = !empty($topics);
+                $is_current_lesson    = ($current_page_id === $lesson_id);
+                $is_sample_l          = get_post_meta($lesson_id, '_smlms_is_sample', true) === '1';
+                $can_view_lesson      = ($access_type === 'open') || current_user_can('manage_options') || $is_enrolled || $is_sample_l;
+                
+                // Check if any child topic is currently active
+                $has_active_child = false;
+                if ($has_topics) {
+                    foreach ($topics as $t) {
+                        if ($t['id'] === $current_page_id) {
+                            $has_active_child = true;
                             break;
                         }
                     }
                 }
             ?>
-                <div class="smlms-tree-lesson-card <?php echo $is_active_branch ? 'active-branch' : ''; ?>">
-                    <div class="smlms-tree-lesson-header <?php echo $is_current_lesson ? 'current-step' : ''; ?>">
-                        <a href="<?php echo esc_url($lesson['permalink']); ?>" class="smlms-tree-lesson-link">
-                            <span class="smlms-status-circle"></span>
-                            <span class="smlms-tree-title"><?php echo ($l_index + 1) . '. ' . esc_html($lesson['lesson_title']); ?></span>
-                        </a>
+                <li class="smlms-sidebar-lesson-item <?php echo $has_active_child ? 'child-active' : ''; ?>">
+                    <div class="smlms-sidebar-row <?php echo $is_current_lesson ? 'active-step' : ''; ?>">
+                        <div class="smlms-sidebar-row-left">
+                            <span class="smlms-status-circle <?php echo $is_current_lesson ? 'active-circle' : ''; ?>"></span>
+                            
+                            <?php if ($can_view_lesson): ?>
+                                <a href="<?php echo esc_url($lesson_url); ?>" class="smlms-sidebar-title-link <?php echo $is_current_lesson ? 'active-text' : ''; ?>">
+                                    <?php echo ($l_index + 1) . '. ' . esc_html($lesson_title); ?>
+                                </a>
+                            <?php else: ?>
+                                <span class="smlms-sidebar-locked-title">
+                                    <?php echo ($l_index + 1) . '. ' . esc_html($lesson_title); ?>
+                                </span>
+                            <?php endif; ?>
+                        </div>
 
-                        <?php if ($has_topics): ?>
-                            <button type="button" class="smlms-sidebar-toggle-btn <?php echo $is_active_branch ? 'open' : ''; ?>">
-                                &#9660;
-                            </button>
-                        <?php endif; ?>
+                        <div class="smlms-sidebar-row-right">
+                            <?php if (!$can_view_lesson): ?>
+                                <span class="dashicons dashicons-lock smlms-sidebar-lock-icon"></span>
+                            <?php endif; ?>
+
+                            <?php if ($has_topics): ?>
+                                <button type="button" class="smlms-sidebar-toggle-btn <?php echo ($is_current_lesson || $has_active_child) ? 'open' : ''; ?>" title="Toggle Topics">
+                                    <span class="dashicons dashicons-arrow-down-alt2"></span>
+                                </button>
+                            <?php endif; ?>
+                        </div>
                     </div>
 
+                    <!-- Child Topics Sub-list -->
                     <?php if ($has_topics): ?>
-                        <div class="smlms-tree-topic-list" style="<?php echo $is_active_branch ? 'display: block;' : 'display: none;'; ?>">
-                            <?php foreach ($lesson['topics'] as $t_index => $topic): 
-                                $is_current_topic = ($topic['id'] == $current_post_id);
+                        <ul class="smlms-sidebar-topic-sublist" style="<?php echo ($is_current_lesson || $has_active_child) ? 'display: block;' : 'display: none;'; ?>">
+                            <?php foreach ($topics as $t_index => $topic): 
+                                $topic_id         = $topic['id'];
+                                $topic_title      = $topic['title'];
+                                $topic_url        = $topic['permalink'];
+                                $is_current_topic = ($current_page_id === $topic_id);
+                                $can_view_topic   = ($access_type === 'open') || current_user_can('manage_options') || $is_enrolled || $is_sample_l;
                             ?>
-                                <div class="smlms-tree-topic-item <?php echo $is_current_topic ? 'current-step' : ''; ?>">
-                                    <a href="<?php echo esc_url($topic['permalink']); ?>" class="smlms-tree-topic-link">
-                                        <span class="smlms-status-circle small"></span>
-                                        <span class="smlms-tree-title"><?php echo ($l_index + 1) . '.' . ($t_index + 1) . ' ' . esc_html($topic['title']); ?></span>
-                                    </a>
-                                </div>
+                                <li class="smlms-sidebar-topic-item">
+                                    <div class="smlms-sidebar-row smlms-topic-row <?php echo $is_current_topic ? 'active-step' : ''; ?>">
+                                        <div class="smlms-sidebar-row-left">
+                                            <span class="smlms-status-circle <?php echo $is_current_topic ? 'active-circle' : ''; ?>"></span>
+                                            
+                                            <?php if ($can_view_topic): ?>
+                                                <a href="<?php echo esc_url($topic_url); ?>" class="smlms-sidebar-title-link <?php echo $is_current_topic ? 'active-text' : ''; ?>">
+                                                    <?php echo ($l_index + 1) . '.' . ($t_index + 1) . ' ' . esc_html($topic_title); ?>
+                                                </a>
+                                            <?php else: ?>
+                                                <span class="smlms-sidebar-locked-title">
+                                                    <?php echo ($l_index + 1) . '.' . ($t_index + 1) . ' ' . esc_html($topic_title); ?>
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <div class="smlms-sidebar-row-right">
+                                            <?php if (!$can_view_topic): ?>
+                                                <span class="dashicons dashicons-lock smlms-sidebar-lock-icon"></span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </li>
                             <?php endforeach; ?>
-                        </div>
+                        </ul>
                     <?php endif; ?>
-                </div>
+                </li>
             <?php endforeach; ?>
-        </div>
+        </ul>
     <?php endif; ?>
 </div>

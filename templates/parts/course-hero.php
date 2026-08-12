@@ -8,6 +8,8 @@ if (!defined('ABSPATH')) exit;
 $course_id        = $context['course_id'];
 $author_id        = $context['author_id'] ?? get_post_field('post_author', $course_id);
 $author_name      = $context['author_name'] ?? (get_the_author_meta('display_name', $author_id) ?: 'Sabin Mathew');
+$access_type      = $context['access_type'] ?? 'closed';
+$user_id          = $context['user_id'];
 $duration         = get_post_meta($course_id, '_smlms_duration', true) ?: '4 Weeks';
 $level            = get_post_meta($course_id, '_smlms_level', true) ?: 'Beginner';
 $language         = get_post_meta($course_id, '_smlms_language', true) ?: 'English';
@@ -24,8 +26,13 @@ if (!$categories) {
     $categories = get_the_term_list($course_id, 'category', '', ', ', '');
 }
 
-// About Me Page URL
 $about_me_url = home_url('/about-me/');
+
+// Build Free Enrollment Nonce URL
+$free_enroll_url = wp_nonce_url(
+    add_query_arg(['smlms_action' => 'free_enroll', 'course_id' => $course_id], get_permalink($course_id)),
+    'smlms_free_enroll_' . $course_id
+);
 ?>
 
 <header class="smlms-hero-banner">
@@ -97,16 +104,28 @@ $about_me_url = home_url('/about-me/');
             </div>
 
             <div class="smlms-card-actions">
-                <?php if (!$context['has_access'] && !empty($context['price'])): ?>
-                    <div class="smlms-card-price-display">
-                        $<?php echo esc_html($context['price']); ?>
-                    </div>
+                <!-- Price Display Logic -->
+                <?php if ($access_type === 'open' || $access_type === 'free'): ?>
+                    <div class="smlms-card-price-display">FREE</div>
+                <?php elseif (!$context['has_access'] && !empty($context['price'])): ?>
+                    <div class="smlms-card-price-display">$<?php echo esc_html($context['price']); ?></div>
                 <?php endif; ?>
 
+                <!-- Primary Action Button Logic -->
                 <?php if ($context['has_access']): ?>
                     <a href="<?php echo esc_url($context['first_step_url']); ?>" class="smlms-btn-start-course">
                         <?php echo $context['is_enrolled'] ? 'RESUME COURSE' : 'START COURSE'; ?>
                     </a>
+                <?php elseif ($access_type === 'free'): ?>
+                    <?php if ($user_id > 0): ?>
+                        <a href="<?php echo esc_url($free_enroll_url); ?>" class="smlms-btn-enroll-now">
+                            Enroll For Free
+                        </a>
+                    <?php else: ?>
+                        <a href="<?php echo esc_url(wp_login_url(get_permalink($course_id))); ?>" class="smlms-btn-enroll-now">
+                            Login To Enroll
+                        </a>
+                    <?php endif; ?>
                 <?php else: ?>
                     <a href="<?php echo esc_url($context['button_url']); ?>" class="smlms-btn-enroll-now">
                         Enroll Now

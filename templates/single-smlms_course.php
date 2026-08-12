@@ -12,7 +12,16 @@ get_header();
 $course_id   = get_the_ID();
 $user_id     = get_current_user_id();
 $is_enrolled = $user_id ? SMLMS_DB::is_user_enrolled($user_id, $course_id) : false;
-$has_access  = current_user_can('manage_options') || $is_enrolled;
+$access_type = get_post_meta($course_id, '_smlms_access_type', true) ?: 'closed';
+
+// Strict Access Control Rules
+if ($access_type === 'open') {
+    $has_access = true;
+} elseif ($access_type === 'free') {
+    $has_access = ($user_id > 0) && (current_user_can('manage_options') || $is_enrolled);
+} else {
+    $has_access = current_user_can('manage_options') || $is_enrolled;
+}
 
 // Author Lookup
 $author_id   = get_post_field('post_author', $course_id);
@@ -29,19 +38,40 @@ if (!empty($hierarchy[0]['permalink'])) {
 }
 
 // Media & Button Details
-$price      = get_post_meta($course_id, '_smlms_price', true) ?: '25';
+$price      = get_post_meta($course_id, '_smlms_price', true);
 $button_url = get_post_meta($course_id, '_smlms_custom_checkout_url', true);
 if (empty($button_url)) {
     $button_url = get_post_meta($course_id, '_smlms_button_url', true) ?: '#';
 }
 
-$embed_url  = get_post_meta($course_id, '_smlms_media_embed', true);
+// Media Embed Video Parser (Vimeo ID / Vimeo URL / YouTube / Iframe)
+$raw_embed = get_post_meta($course_id, '_smlms_media_embed', true);
+$embed_url = '';
+
+if (!empty($raw_embed)) {
+    $raw_embed = trim($raw_embed);
+    if (strpos($raw_embed, '<iframe') !== false) {
+        preg_match('/src=["\']([^"\']+)["\']/', $raw_embed, $matches);
+        $embed_url = !empty($matches[1]) ? $matches[1] : '';
+    } elseif (is_numeric($raw_embed)) {
+        $embed_url = 'https://player.vimeo.com/video/' . $raw_embed;
+    } elseif (strpos($raw_embed, 'vimeo.com') !== false) {
+        preg_match('/vimeo\.com\/(?:video\/)?([0-9]+)/', $raw_embed, $matches);
+        $embed_url = !empty($matches[1]) ? 'https://player.vimeo.com/video/' . $matches[1] : esc_url($raw_embed);
+    } elseif (strpos($raw_embed, 'youtube.com') !== false || strpos($raw_embed, 'youtu.be') !== false) {
+        preg_match('/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/', $raw_embed, $matches);
+        $embed_url = !empty($matches[1]) ? 'https://www.youtube.com/embed/' . $matches[1] : esc_url($raw_embed);
+    } else {
+        $embed_url = esc_url($raw_embed);
+    }
+}
 
 $context = [
     'course_id'      => $course_id,
     'user_id'        => $user_id,
     'is_enrolled'    => $is_enrolled,
     'has_access'     => $has_access,
+    'access_type'    => $access_type,
     'hierarchy'      => $hierarchy,
     'first_step_url' => $first_step_url,
     'price'          => $price,
@@ -92,6 +122,7 @@ $context = [
                         <?php echo get_avatar($author_id, 80, '', 'Instructor Avatar', ['class' => 'smlms-instructor-avatar']); ?>
                         <div class="smlms-instructor-info">
                             <h3 class="smlms-instructor-name"><?php echo esc_html($author_name); ?></h3>
+                            <span class="smlms-instructor-role">Course Instructor</span>
                         </div>
                     </div>
                     <?php if (!empty($author_bio)): ?>
@@ -133,13 +164,27 @@ function smlmsOpenCourseVideo(element) {
     var modal = jQuery('#smlms-video-modal');
 
     rawEmbed = rawEmbed.trim();
+    var finalUrl = '';
+
     if (rawEmbed.indexOf('<iframe') !== -1) {
-        playerWrap.html(rawEmbed);
+        var match = rawEmbed.match(/src=["']([^"']+)["']/);
+        finalUrl = match ? match[1] : '';
+    } else if (/^\d+$/.test(rawEmbed)) {
+        finalUrl = 'https://player.vimeo.com/video/' + rawEmbed;
+    } else if (rawEmbed.indexOf('vimeo.com') !== -1) {
+        var matchVimeo = rawEmbed.match(/vimeo\.com\/(?:video\/)?([0-9]+)/);
+        finalUrl = matchVimeo ? 'https://player.vimeo.com/video/' + matchVimeo[1] : rawEmbed;
+    } else if (rawEmbed.indexOf('youtube.com') !== -1 || rawEmbed.indexOf('youtu.be') !== -1) {
+        var matchYt = rawEmbed.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/);
+        finalUrl = matchYt ? 'https://www.youtube.com/embed/' . matchYt[1] : rawEmbed;
     } else {
-        playerWrap.html('<iframe src="' + rawEmbed + '" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>');
+        finalUrl = rawEmbed;
     }
 
-    modal.addClass('active');
+    if (finalUrl) {
+        playerWrap.html('<iframe src="' + finalUrl + '" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>');
+        modal.addClass('active');
+    }
 }
 
 function smlmsCloseCourseVideo() {

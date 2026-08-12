@@ -1,6 +1,6 @@
 <?php
 /**
- * Standalone Theme-Proof Canvas Template for Focus Mode
+ * Standalone Canvas Template for Focus Mode
  */
 
 if (!defined('ABSPATH')) exit;
@@ -14,19 +14,28 @@ $is_lesson = ($post_type === 'smlms_lesson');
 $course_id = SMLMS_DB::get_parent_course_id($post_id);
 $hierarchy = $course_id ? SMLMS_DB::get_course_hierarchy($course_id, $user_id) : [];
 
-// Access Permissions with Inherited Sample Check
+// Course Access Mode Lookup
+$access_type = $course_id ? (get_post_meta($course_id, '_smlms_access_type', true) ?: 'closed') : 'closed';
+
+// Sample Status Check
 $is_sample = false;
 if ($is_lesson) {
     $is_sample = (get_post_meta($post_id, '_smlms_is_sample', true) === '1');
 } else {
-    // Topic: Check parent lesson's sample status
     $parent_lesson_id = get_post_meta($post_id, '_smlms_parent_lesson_id', true);
     if ($parent_lesson_id) {
         $is_sample = (get_post_meta($parent_lesson_id, '_smlms_is_sample', true) === '1');
     }
 }
 
-$has_access = current_user_can('manage_options') || ($course_id && SMLMS_DB::is_user_enrolled($user_id, $course_id)) || $is_sample;
+// Access Rules Evaluation
+if ($access_type === 'open') {
+    $has_access = true;
+} elseif ($access_type === 'free') {
+    $has_access = ($user_id > 0) && ($is_sample || current_user_can('manage_options') || ($course_id && SMLMS_DB::is_user_enrolled($user_id, $course_id)));
+} else {
+    $has_access = $is_sample || current_user_can('manage_options') || ($course_id && SMLMS_DB::is_user_enrolled($user_id, $course_id));
+}
 
 // Check Materials Availability
 $materials_enabled = get_post_meta($post_id, '_smlms_materials_enabled', true) ?: '0';
@@ -57,14 +66,82 @@ if (!empty($video_url)) {
         $embed_src = esc_url($video_url);
     }
 }
+
+// Linear Sequence Calculation for Previous / Next Step Navigation
+$all_steps = [];
+$parent_lesson_url = '';
+if (!empty($hierarchy)) {
+    foreach ($hierarchy as $l_item) {
+        $all_steps[] = [
+            'id'    => $l_item['lesson_id'],
+            'url'   => $l_item['permalink'],
+            'type'  => 'lesson',
+            'title' => $l_item['lesson_title']
+        ];
+        if (!empty($l_item['topics'])) {
+            foreach ($l_item['topics'] as $t_item) {
+                if ($t_item['id'] == $post_id) {
+                    $parent_lesson_url = $l_item['permalink'];
+                }
+                $all_steps[] = [
+                    'id'    => $t_item['id'],
+                    'url'   => $t_item['permalink'],
+                    'type'  => 'topic',
+                    'title' => $t_item['title']
+                ];
+            }
+        }
+    }
+}
+
+$next_step_url   = '';
+$next_step_label = '';
+$prev_step_url   = '';
+$prev_step_label = '';
+$current_idx     = -1;
+
+foreach ($all_steps as $idx => $step) {
+    if ($step['id'] == $post_id) {
+        $current_idx = $idx;
+        break;
+    }
+}
+
+if ($current_idx !== -1) {
+    if (isset($all_steps[$current_idx + 1])) {
+        $next_step       = $all_steps[$current_idx + 1];
+        $next_step_url   = $next_step['url'];
+        $next_step_label = ($next_step['type'] === 'topic') ? 'Next Topic' : 'Next Lesson';
+    }
+    if (isset($all_steps[$current_idx - 1])) {
+        $prev_step       = $all_steps[$current_idx - 1];
+        $prev_step_url   = $prev_step['url'];
+        $prev_step_label = ($prev_step['type'] === 'topic') ? 'Previous Topic' : 'Previous Lesson';
+    }
+}
+
+// Fetch Child Topics for Current Lesson
+$lesson_topics = $is_lesson ? SMLMS_DB::get_lesson_topics($post_id) : [];
+
+// Determine Parent Lesson Number
+$parent_l_number = 1;
+if (!empty($hierarchy)) {
+    foreach ($hierarchy as $l_i => $l_node) {
+        if ($l_node['lesson_id'] == $post_id) {
+            $parent_l_number = $l_i + 1;
+            break;
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>
     <meta charset="<?php bloginfo('charset'); ?>">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title><?php wp_title('|', true, 'right'); ?></title>
     <?php wp_head(); ?>
+    <link rel="stylesheet" href="<?php echo esc_url(SMLMS_PLUGIN_URL . 'public/css/smlms-focus-mode.css?v=' . time()); ?>">
 </head>
 <body <?php body_class('smlms-focus-canvas-body'); ?>>
 
@@ -73,12 +150,16 @@ if (!empty($video_url)) {
     <!-- Top Bar Navigation Header -->
     <header class="smlms-focus-topbar">
         <div class="smlms-topbar-left">
+            <button type="button" id="smlms-mobile-menu-toggle" class="smlms-mobile-menu-btn" title="Open Menu">
+                <span class="dashicons dashicons-menu"></span>
+            </button>
+
             <a href="<?php echo esc_url(home_url('/')); ?>" class="smlms-topbar-brand">
                 <?php bloginfo('name'); ?>
             </a>
         </div>
 
-        <div class="smlms-topbar-center">
+        <div class="smlms-topbar-center smlms-desktop-only">
             <div class="smlms-progress-widget">
                 <span class="smlms-progress-label">0% COMPLETE</span>
                 <div class="smlms-progress-track">
@@ -90,25 +171,62 @@ if (!empty($video_url)) {
         </div>
 
         <div class="smlms-topbar-right">
+            <?php if (!empty($next_step_url)): ?>
+                <a href="<?php echo esc_url($next_step_url); ?>" class="smlms-topbar-next-link smlms-desktop-only">
+                    <?php echo esc_html($next_step_label); ?> &gt;
+                </a>
+            <?php endif; ?>
+
             <?php if ($user_id): $user = wp_get_current_user(); ?>
-                <span class="smlms-user-greeting">Hello, <strong><?php echo esc_html($user->display_name); ?></strong>!</span>
+                <span class="smlms-user-greeting smlms-desktop-only">Hello, <strong><?php echo esc_html($user->display_name); ?></strong>!</span>
                 <img src="<?php echo esc_url(get_avatar_url($user_id, ['size' => 32])); ?>" class="smlms-user-avatar" alt="Avatar">
             <?php else: ?>
-                <span class="smlms-user-greeting">Hello, <strong>Visitor</strong>!</span>
+                <span class="smlms-user-greeting smlms-desktop-only">Hello, <strong>Visitor</strong>!</span>
             <?php endif; ?>
         </div>
     </header>
 
+    <!-- Mobile Sub-Navigation Row -->
+    <div class="smlms-focus-mobile-subnav">
+        <div class="smlms-mobile-subnav-col left">
+            <?php if (!empty($prev_step_url)): ?>
+                <a href="<?php echo esc_url($prev_step_url); ?>" class="smlms-mobile-subnav-link">
+                    &lt; <?php echo esc_html($prev_step_label); ?>
+                </a>
+            <?php endif; ?>
+        </div>
+        <div class="smlms-mobile-subnav-col right">
+            <?php if (!empty($next_step_url)): ?>
+                <a href="<?php echo esc_url($next_step_url); ?>" class="smlms-mobile-subnav-link">
+                    <?php echo esc_html($next_step_label); ?> &gt;
+                </a>
+            <?php endif; ?>
+        </div>
+    </div>
+
     <div class="smlms-focus-stage-split">
         
-        <!-- Left Sidebar Navigation Tree -->
-        <aside class="smlms-focus-sidebar">
+        <!-- Mobile Sidebar Backdrop Overlay -->
+        <div id="smlms-sidebar-backdrop" class="smlms-sidebar-backdrop"></div>
+
+        <!-- Floating Expand Trigger Tab (Desktop) -->
+        <button type="button" id="smlms-sidebar-expand-btn" class="smlms-sidebar-expand-tab" title="Open Sidebar">
+            <span class="smlms-expand-btn-inner">
+                <span class="dashicons dashicons-arrow-right-alt2"></span>
+            </span>
+        </button>
+
+        <!-- Left Sidebar Navigation Drawer -->
+        <aside class="smlms-focus-sidebar" id="smlms-focus-sidebar">
             <?php if ($course_id): ?>
                 <div class="smlms-sidebar-header-box">
-                    <a href="<?php echo esc_url(get_permalink($course_id)); ?>" class="smlms-sidebar-course-link">
-                        <span><?php echo esc_html(get_the_title($course_id)); ?></span>
-                        <span class="smlms-back-arrow">&lt;</span>
-                    </a>
+                    <div class="smlms-sidebar-header-title-wrap">
+                        <span class="dashicons dashicons-welcome-learn-more smlms-sidebar-header-icon"></span>
+                        <span class="smlms-sidebar-course-name"><?php echo esc_html(get_the_title($course_id)); ?></span>
+                    </div>
+                    <button type="button" id="smlms-sidebar-collapse-btn" class="smlms-sidebar-collapse-btn" title="Hide Sidebar">
+                        <span class="dashicons dashicons-arrow-left-alt2"></span>
+                    </button>
                 </div>
             <?php endif; ?>
 
@@ -121,28 +239,26 @@ if (!empty($video_url)) {
         <main class="smlms-focus-main-stage">
             <div class="smlms-focus-stage-inner">
                 
-                <div class="smlms-breadcrumbs-header-row">
-                    <nav class="smlms-breadcrumbs">
-                        <?php if ($course_id): ?>
-                            <a href="<?php echo esc_url(get_permalink($course_id)); ?>"><?php echo esc_html(get_the_title($course_id)); ?></a> &gt; 
-                        <?php endif; ?>
-                        <span><?php the_title(); ?></span>
-                    </nav>
-                    <span class="smlms-status-badge">IN PROGRESS</span>
-                </div>
-
-                <h1 class="smlms-step-main-title"><?php the_title(); ?></h1>
+                <h1 class="smlms-step-main-title"><?php echo $parent_l_number . '. ' . esc_html(get_the_title()); ?></h1>
 
                 <?php if (!$has_access): ?>
                     <div class="smlms-access-restricted-box">
                         <span class="dashicons dashicons-lock"></span>
                         <h2>Access Restricted</h2>
-                        <p>You must be enrolled in this course to view this step.</p>
+                        <p><?php echo ($access_type === 'free') ? 'Please log in and enroll to view this free course.' : 'You must be enrolled in this course to view this step.'; ?></p>
                         <?php if ($course_id): ?>
                             <a href="<?php echo esc_url(get_permalink($course_id)); ?>" class="smlms-btn-enroll-link">View Course Page</a>
                         <?php endif; ?>
                     </div>
                 <?php else: ?>
+
+                    <!-- Light Blue/Grey Breadcrumb Banner -->
+                    <div class="smlms-focus-breadcrumb-banner">
+                        <?php if ($course_id): ?>
+                            <a href="<?php echo esc_url(get_permalink($course_id)); ?>"><?php echo esc_html(get_the_title($course_id)); ?></a> &gt; 
+                        <?php endif; ?>
+                        <span><?php echo $parent_l_number . '. ' . esc_html(get_the_title()); ?></span>
+                    </div>
 
                     <!-- Tabs Bar: ONLY Rendered if Materials Exist -->
                     <?php if ($has_materials): ?>
@@ -175,28 +291,37 @@ if (!empty($video_url)) {
                                 ?>
                             </div>
 
-                            <!-- Topic Sub-list Inside Lessons -->
-                            <?php if ($is_lesson): 
-                                $topics = SMLMS_DB::get_lesson_topics($post_id);
-                                if (!empty($topics)):
-                            ?>
-                                <div class="smlms-lesson-topics-box">
-                                    <h3>Topics in this Lesson</h3>
-                                    <ul class="smlms-topics-list">
-                                        <?php foreach ($topics as $topic): ?>
-                                            <li>
-                                                <a href="<?php echo esc_url(get_permalink($topic->ID)); ?>">
-                                                    <div class="smlms-topic-left">
-                                                        <span class="dashicons dashicons-controls-play"></span>
-                                                        <span><?php echo esc_html($topic->post_title); ?></span>
-                                                    </div>
-                                                    <span class="smlms-topic-duration"><?php echo esc_html(get_post_meta($topic->ID, '_smlms_duration', true) ?: '5.04'); ?></span>
-                                                </a>
+                            <!-- Dedicated Child Topics List Card -->
+                            <?php if ($is_lesson && !empty($lesson_topics)): ?>
+                                <div class="smlms-lesson-topics-card">
+                                    <ul class="smlms-lesson-topics-group">
+                                        <?php foreach ($lesson_topics as $t_index => $t_obj): 
+                                            $t_id       = $t_obj->ID;
+                                            $t_title    = $t_obj->post_title;
+                                            $t_url      = get_permalink($t_id);
+                                            $t_duration = get_post_meta($t_id, '_smlms_duration', true) ?: '5.00';
+                                            $t_type     = strtolower(trim((string) get_post_meta($t_id, '_smlms_content_type', true)));
+                                            $t_icon     = ($t_type === 'presentation') ? 'dashicons-media-interactive' : 'dashicons-controls-play';
+                                        ?>
+                                            <li class="smlms-lesson-topic-row">
+                                                <div class="smlms-lesson-topic-left">
+                                                    <span class="smlms-topic-play-icon" title="<?php echo esc_attr(ucfirst($t_type)); ?>">
+                                                        <span class="dashicons <?php echo esc_attr($t_icon); ?>"></span>
+                                                    </span>
+                                                    <a href="<?php echo esc_url($t_url); ?>" class="smlms-lesson-topic-link">
+                                                        <?php echo $parent_l_number . '.' . ($t_index + 1) . ' ' . esc_html($t_title); ?>
+                                                    </a>
+                                                </div>
+
+                                                <div class="smlms-lesson-topic-right">
+                                                    <span class="smlms-topic-duration"><?php echo esc_html($t_duration); ?></span>
+                                                    <span class="smlms-status-circle"></span>
+                                                </div>
                                             </li>
                                         <?php endforeach; ?>
                                     </ul>
                                 </div>
-                            <?php endif; endif; ?>
+                            <?php endif; ?>
 
                         </div>
 
@@ -211,15 +336,35 @@ if (!empty($video_url)) {
 
                     </div>
 
-                    <!-- Footer Action Row -->
-                    <div class="smlms-focus-footer-row">
-                        <?php if ($course_id): ?>
-                            <a href="<?php echo esc_url(get_permalink($course_id)); ?>" class="smlms-back-course-link">&larr; Back to Course</a>
-                        <?php endif; ?>
+                    <!-- Horizontal Footer Navigation Action Row -->
+                    <div class="smlms-focus-footer-nav-row">
+                        <div class="smlms-footer-col left">
+                            <?php if (!empty($prev_step_url)): ?>
+                                <a href="<?php echo esc_url($prev_step_url); ?>" class="smlms-btn-pill-cyan">
+                                    &lt; <?php echo esc_html($prev_step_label); ?>
+                                </a>
+                            <?php endif; ?>
+                        </div>
 
-                        <button type="button" class="smlms-btn-mark-complete">
-                            Mark Complete &#10003;
-                        </button>
+                        <div class="smlms-footer-col center">
+                            <?php if (!$is_lesson && !empty($parent_lesson_url)): ?>
+                                <a href="<?php echo esc_url($parent_lesson_url); ?>" class="smlms-center-nav-link">Back to Lesson</a>
+                            <?php elseif ($course_id): ?>
+                                <a href="<?php echo esc_url(get_permalink($course_id)); ?>" class="smlms-center-nav-link">Back to Course</a>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="smlms-footer-col right">
+                            <?php if (!empty($next_step_url)): ?>
+                                <a href="<?php echo esc_url($next_step_url); ?>" class="smlms-btn-pill-cyan">
+                                    <?php echo esc_html($next_step_label); ?> &gt;
+                                </a>
+                            <?php else: ?>
+                                <button type="button" class="smlms-btn-mark-complete">
+                                    Mark Complete &#10003;
+                                </button>
+                            <?php endif; ?>
+                        </div>
                     </div>
 
                 <?php endif; ?>
@@ -232,6 +377,36 @@ if (!empty($video_url)) {
 
 <script>
 jQuery(document).ready(function($) {
+    const focusApp = $('#smlms-focus-app');
+
+    // Default desktop state: Sidebar OPEN unless user explicitly collapsed it
+    if ($(window).width() > 768) {
+        if (localStorage.getItem('smlms_sidebar_collapsed') === 'true') {
+            focusApp.addClass('sidebar-collapsed');
+        } else {
+            focusApp.removeClass('sidebar-collapsed');
+        }
+    }
+
+    // Toggle Sidebar Drawer (Mobile & Desktop)
+    $(document).on('click', '#smlms-mobile-menu-toggle, #smlms-sidebar-expand-btn', function(e) {
+        e.preventDefault();
+        focusApp.removeClass('sidebar-collapsed').addClass('drawer-open');
+        if ($(window).width() > 768) {
+            localStorage.setItem('smlms_sidebar_collapsed', 'false');
+        }
+    });
+
+    $(document).on('click', '#smlms-sidebar-collapse-btn, #smlms-sidebar-backdrop', function(e) {
+        e.preventDefault();
+        focusApp.removeClass('drawer-open');
+        if ($(window).width() > 768) {
+            focusApp.addClass('sidebar-collapsed');
+            localStorage.setItem('smlms_sidebar_collapsed', 'true');
+        }
+    });
+
+    // Focus Mode Tab Switcher
     $(document).on('click', '.smlms-focus-tab-link', function(e) {
         e.preventDefault();
         $('.smlms-focus-tab-link').removeClass('active');
@@ -241,12 +416,24 @@ jQuery(document).ready(function($) {
         $($(this).data('target')).addClass('active');
     });
 
+    // Sidebar Accordion Drawer Toggle
     $(document).on('click', '.smlms-sidebar-toggle-btn', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        var targetList = $(this).closest('.smlms-tree-lesson-card').find('.smlms-tree-topic-list');
+        var targetList = $(this).closest('.smlms-sidebar-lesson-item').find('.smlms-sidebar-topic-sublist');
         targetList.slideToggle(150);
         $(this).toggleClass('open');
+    });
+
+    // Ensure all Materials links & PDFs open cleanly and are downloadable
+    $('.smlms-materials-body-box a').each(function() {
+        var href = $(this).attr('href');
+        if (href) {
+            $(this).attr('target', '_blank');
+            if (href.match(/\.(pdf|doc|docx|zip|rar|png|jpg|jpeg|csv|xls|xlsx)$/i)) {
+                $(this).attr('download', '');
+            }
+        }
     });
 });
 </script>

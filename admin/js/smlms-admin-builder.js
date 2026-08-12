@@ -11,12 +11,12 @@ jQuery(document).ready(function($) {
         $('.smlms-admin-tab-btn').removeClass('active');
         $(this).addClass('active');
 
-        // Target Specific Elements and Meta Boxes
+        // Target Specific Meta Boxes and Layout Containers
         var $editorWrap        = $('#postdivrich, #edit-slug-box, #post-body-content .wp-editor-wrap');
-        var $courseCustomMeta  = $('#smlms_course_custom_meta'); // Assigned exclusively to Course Page tab
+        var $courseCustomMeta  = $('#smlms_course_custom_meta'); // Exclusively on Course Page tab
         var $builderMain       = $('#smlms_course_builder_meta');
         var $builderSide       = $('#smlms_lessons_picker_meta, #smlms_topics_picker_meta');
-        var $settingsMain      = $('#smlms_course_details_meta, #smlms_display_options_meta');
+        var $settingsMain      = $('#smlms_course_details_meta, #smlms_course_students_meta, #smlms_display_options_meta'); // Exclusively on Settings tab
         var $standardSide      = $('#categorydiv, #smlms_course_categorydiv, #postimagediv, #tagsdiv-smlms_course_category');
 
         if (tab === 'course-page') {
