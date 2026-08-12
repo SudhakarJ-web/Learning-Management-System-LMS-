@@ -1,359 +1,358 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-/* --- Global Reset for Focus Mode --- */
-html,
-body.smlms-focus-mode-active {
+body.smlms-focus-canvas-body {
     margin: 0 !important;
     padding: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
     overflow: hidden !important;
+    background-color: #f8fafc !important;
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-    background-color: #ffffff !important;
-    color: #2d3748 !important;
-    font-weight: 400 !important;
 }
 
-body.smlms-focus-mode-active button,
-body.smlms-focus-mode-active input,
-body.smlms-focus-mode-active select,
-body.smlms-focus-mode-active textarea {
-    font-family: 'Poppins', sans-serif !important;
-}
-
-/* --- Strict Dashicons Reset inside Focus Mode --- */
-body.smlms-focus-mode-active .dashicons,
-body.smlms-focus-mode-active span.dashicons {
-    font-family: "dashicons" !important;
-    font-style: normal !important;
-    font-weight: normal !important;
-    font-variant: normal !important;
-    text-transform: none !important;
-    line-height: 1 !important;
-    display: inline-block !important;
-    text-align: center !important;
-    vertical-align: middle !important;
-    -webkit-font-smoothing: antialiased !important;
-    -moz-osx-font-smoothing: grayscale !important;
-}
-
-/* --- Wrapper & Main Grid --- */
-.smlms-focus-wrapper,
-.smlms-focus-container {
-    display: flex !important;
-    flex-direction: row !important;
+.smlms-focus-app-stage {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
-    overflow: hidden !important;
-}
-
-/* --- Left Sidebar (LearnDash Light Style) --- */
-.smlms-focus-sidebar {
-    width: 380px !important;
-    min-width: 380px !important;
-    max-width: 380px !important;
-    background-color: #f8fafc !important;
-    border-right: 1px solid #cbd5e1 !important;
+    z-index: 999999 !important;
     display: flex !important;
     flex-direction: column !important;
-    height: 100vh !important;
-    flex-shrink: 0 !important;
-    overflow: hidden !important;
-    box-sizing: border-box !important;
-    transition: margin-left 0.3s ease !important;
-}
-
-.smlms-focus-sidebar.collapsed {
-    margin-left: -380px !important;
-}
-
-/* Bright Cyan Course Banner Header */
-.smlms-sidebar-course-header {
-    background-color: #00a2e8 !important;
-    color: #ffffff !important;
-    padding: 16px 20px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 12px !important;
+    background: #f8fafc !important;
     box-sizing: border-box !important;
 }
 
-.smlms-course-header-left {
-    display: flex !important;
-    align-items: center !important;
-    gap: 10px !important;
-    overflow: hidden !important;
+.smlms-focus-app-stage.has-admin-bar {
+    top: 32px !important;
+    height: calc(100vh - 32px) !important;
 }
 
-.smlms-header-icon {
-    color: #ffffff !important;
-    font-size: 20px !important;
-}
-
-.smlms-course-header-title {
-    color: #ffffff !important;
-    text-decoration: none !important;
-    font-weight: 600 !important;
-    font-size: 15px !important;
-    line-height: 1.3 !important;
-}
-
-.smlms-sidebar-toggle-btn {
-    background: rgba(255, 255, 255, 0.2) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
-    color: #ffffff !important;
-    width: 30px !important;
-    height: 30px !important;
-    border-radius: 4px !important;
-    cursor: pointer !important;
-    font-weight: 600 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    flex-shrink: 0 !important;
-}
-
-/* Navigation Tree Scroll Area */
-.smlms-sidebar-content-scroll {
-    overflow-y: auto !important;
-    flex-grow: 1 !important;
-    padding: 15px !important;
-    background-color: #f8fafc !important;
-}
-
-/* Lesson Cards (White Boxes with Borders) */
-.smlms-ld-lesson-card {
-    background: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    border-radius: 6px !important;
-    margin-bottom: 10px !important;
-    overflow: hidden !important;
-}
-
-.smlms-ld-lesson-header {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    padding: 12px 14px !important;
-    background: #ffffff !important;
-}
-
-.smlms-ld-lesson-link {
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
-    text-decoration: none !important;
-    color: #00a2e8 !important;
-    font-weight: 600 !important;
-    font-size: 14px !important;
-    flex: 1 !important;
-}
-
-.smlms-circle-status {
-    width: 16px !important;
-    height: 16px !important;
-    border-radius: 50% !important;
-    border: 2px solid #00a2e8 !important;
-    display: inline-block !important;
-    flex-shrink: 0 !important;
-    box-sizing: border-box !important;
-}
-
-.smlms-ld-toggle-btn {
-    width: 28px !important;
-    height: 28px !important;
-    background-color: #00a2e8 !important;
-    color: #ffffff !important;
-    border: none !important;
-    border-radius: 3px !important;
-    cursor: pointer !important;
-    font-size: 10px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: transform 0.2s !important;
-}
-
-.smlms-ld-toggle-btn.active {
-    transform: rotate(180deg) !important;
-}
-
-/* Topics Accordion Container */
-.smlms-ld-topics-wrapper {
-    background: #f1f5f9 !important;
-    border-top: 1px solid #e2e8f0 !important;
-    padding: 8px 12px !important;
-}
-
-.smlms-ld-topic-list {
-    list-style: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-.smlms-ld-topic-item {
-    margin-bottom: 4px !important;
-}
-
-.smlms-ld-topic-link {
-    display: flex !important;
-    align-items: center !important;
-    gap: 10px !important;
-    padding: 8px 10px !important;
-    color: #334155 !important;
-    text-decoration: none !important;
-    font-size: 13px !important;
-    font-weight: 400 !important;
-    border-radius: 4px !important;
-}
-
-.smlms-ld-topic-link:hover {
-    color: #00a2e8 !important;
-    background: #e2e8f0 !important;
-}
-
-.smlms-ld-topic-item.smlms-current-topic .smlms-ld-topic-link {
-    color: #00a2e8 !important;
-    font-weight: 600 !important;
-}
-
-.smlms-ld-topic-item.is-completed .smlms-topic-circle {
-    background-color: #00a2e8 !important;
-}
-
-/* --- Main Focus Stage Area --- */
-.smlms-focus-main {
-    flex-grow: 1 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    height: 100vh !important;
-    overflow: hidden !important;
-    background: #ffffff !important;
-}
-
-.smlms-focus-header {
-    height: 65px !important;
-    min-height: 65px !important;
+/* Top Header Bar */
+.smlms-focus-topbar {
+    height: 60px !important;
+    min-height: 60px !important;
     background: #ffffff !important;
     border-bottom: 1px solid #e2e8f0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    padding: 0 30px !important;
-    box-sizing: border-box !important;
-    flex-shrink: 0 !important;
+    padding: 0 25px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
+    z-index: 10 !important;
 }
 
-.smlms-header-progress {
-    width: 260px !important;
+.smlms-topbar-brand {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    text-decoration: none !important;
 }
 
-.smlms-progress-stats {
+.smlms-topbar-center {
     display: flex !important;
-    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 20px !important;
+}
+
+.smlms-progress-widget {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
     font-size: 12px !important;
     font-weight: 600 !important;
-    color: #64748b !important;
-    margin-bottom: 6px !important;
+    color: #00a2e8 !important;
 }
 
-.smlms-progress-percent {
-    color: #019e7c !important;
-}
-
-.smlms-progress-bar-bg {
+.smlms-progress-track {
+    width: 120px !important;
     height: 8px !important;
     background: #e2e8f0 !important;
     border-radius: 4px !important;
     overflow: hidden !important;
 }
 
-.smlms-progress-bar-fill {
+.smlms-progress-fill {
     height: 100% !important;
-    background: #019e7c !important;
-    transition: width 0.3s ease !important;
+    background: #00a2e8 !important;
 }
 
-.smlms-header-actions {
-    display: flex !important;
-    align-items: center !important;
-    gap: 15px !important;
+.smlms-progress-count {
+    color: #64748b !important;
 }
 
-.smlms-btn-action {
+.smlms-btn-header-complete {
+    background: #cbd5e1 !important;
+    color: #ffffff !important;
+    border: none !important;
     padding: 8px 18px !important;
     border-radius: 20px !important;
+    font-size: 12px !important;
     font-weight: 600 !important;
-    font-size: 13px !important;
     cursor: pointer !important;
-    border: none !important;
 }
 
-.smlms-btn-complete {
-    background: #22c55e !important;
-    color: #ffffff !important;
-}
-
-.smlms-btn-complete:disabled {
-    background: #cbd5e1 !important;
-    cursor: not-allowed !important;
-}
-
-.smlms-user-welcome {
+.smlms-topbar-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
     font-size: 13px !important;
     color: #475569 !important;
 }
 
 .smlms-user-avatar {
-    width: 36px !important;
-    height: 36px !important;
+    width: 32px !important;
+    height: 32px !important;
     border-radius: 50% !important;
-    object-fit: cover !important;
 }
 
-.smlms-focus-stage {
-    flex-grow: 1 !important;
+/* Layout Split */
+.smlms-focus-stage-split {
+    flex: 1 !important;
+    display: flex !important;
+    height: calc(100% - 60px) !important;
+    overflow: hidden !important;
+}
+
+.smlms-focus-sidebar {
+    width: 320px !important;
+    min-width: 320px !important;
+    max-width: 320px !important;
+    background: #ffffff !important;
+    border-right: 1px solid #e2e8f0 !important;
+    height: 100% !important;
     overflow-y: auto !important;
-    padding: 30px 50px !important;
+}
+
+.smlms-sidebar-header-box {
+    background: #00a2e8 !important;
+    padding: 16px 20px !important;
+}
+
+.smlms-sidebar-course-link {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    text-decoration: none !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+.smlms-back-arrow {
+    background: #008cc9 !important;
+    color: #ffffff !important;
+    padding: 2px 8px !important;
+    border-radius: 4px !important;
+    font-size: 11px !important;
+}
+
+.smlms-sidebar-content-tree {
+    padding: 15px !important;
+}
+
+/* Main Content Stage */
+.smlms-focus-main-stage {
+    flex: 1 !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+    background: #ffffff !important;
+    padding: 40px !important;
     box-sizing: border-box !important;
 }
 
-.smlms-stage-tabs-header {
+.smlms-focus-stage-inner {
+    max-width: 900px !important;
+    margin: 0 auto !important;
+}
+
+.smlms-breadcrumbs-header-row {
     display: flex !important;
-    border-bottom: 2px solid #e2e8f0 !important;
-    margin-bottom: 20px !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 15px !important;
 }
 
-.smlms-stage-tab-btn {
-    background: none !important;
-    border: none !important;
-    padding: 10px 20px !important;
-    font-size: 15px !important;
-    font-weight: 500 !important;
-    color: #64748b !important;
-    cursor: pointer !important;
-    border-bottom: 2px solid transparent !important;
-    margin-bottom: -2px !important;
-}
-
-.smlms-stage-tab-btn.active {
+.smlms-breadcrumbs {
+    font-size: 13px !important;
     color: #00a2e8 !important;
-    border-bottom-color: #00a2e8 !important;
     font-weight: 600 !important;
 }
 
-.smlms-stage-tab-pane {
-    display: none !important;
+.smlms-breadcrumbs a {
+    color: #00a2e8 !important;
+    text-decoration: none !important;
 }
 
-.smlms-stage-tab-pane.active {
+.smlms-status-badge {
+    background: #00a2e8 !important;
+    color: #ffffff !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 4px 12px !important;
+    border-radius: 12px !important;
+}
+
+.smlms-step-main-title {
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin: 0 0 25px 0 !important;
+}
+
+/* Tabs Bar */
+.smlms-focus-tabs-nav {
+    display: flex !important;
+    gap: 20px !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    margin-bottom: 25px !important;
+}
+
+.smlms-focus-tab-link {
+    background: none !important;
+    border: none !important;
+    border-bottom: 3px solid transparent !important;
+    padding: 10px 5px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.smlms-focus-tab-link.active {
+    color: #00a2e8 !important;
+    border-bottom-color: #00a2e8 !important;
+}
+
+.smlms-focus-tab-pane {
+    display: none;
+}
+
+.smlms-focus-tab-pane.active {
     display: block !important;
 }
 
-.smlms-video-container {
+/* Video Player */
+.smlms-focus-video-wrap {
     position: relative !important;
-    border-radius: 8px !important;
+    width: 100% !important;
+    padding-top: 56.25% !important;
+    height: 0 !important;
     overflow: hidden !important;
-    margin-bottom: 20px !important;
+    border-radius: 8px !important;
+    background: #000000 !important;
+    margin-bottom: 30px !important;
+}
+
+.smlms-focus-video-wrap iframe {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border: 0 !important;
+}
+
+/* Topics Box */
+.smlms-lesson-topics-box {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 20px !important;
+    margin-top: 30px !important;
+}
+
+.smlms-lesson-topics-box h3 {
+    margin: 0 0 15px 0 !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+}
+
+.smlms-topics-list {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.smlms-topics-list li a {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 12px 16px !important;
+    border-radius: 6px !important;
+    margin-bottom: 8px !important;
+    text-decoration: none !important;
+    color: #334155 !important;
+    font-weight: 500 !important;
+}
+
+.smlms-topic-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+.smlms-topic-left .dashicons {
+    color: #00a2e8 !important;
+}
+
+.smlms-topic-duration {
+    color: #64748b !important;
+    font-size: 13px !important;
+}
+
+/* Footer Row */
+.smlms-focus-footer-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-top: 40px !important;
+    padding-top: 20px !important;
+    border-top: 1px solid #e2e8f0 !important;
+}
+
+.smlms-back-course-link {
+    color: #00a2e8 !important;
+    text-decoration: none !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+}
+
+.smlms-btn-mark-complete {
+    background: #22c55e !important;
+    color: #ffffff !important;
+    border: none !important;
+    padding: 12px 24px !important;
+    border-radius: 25px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+}
+
+.smlms-materials-body-box {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 25px !important;
+    line-height: 1.6 !important;
+}
+
+@media screen and (max-width: 768px) {
+    .smlms-focus-stage-split {
+        flex-direction: column !important;
+    }
+
+    .smlms-focus-sidebar {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        max-height: 250px !important;
+    }
+
+    .smlms-focus-main-stage {
+        padding: 20px 15px !important;
+    }
 }

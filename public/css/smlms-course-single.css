@@ -1,42 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
 
-/* --- Global Font & Layout Reset --- */
-.smlms-single-course-page {
-    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-    color: #334155 !important;
-    background-color: #f8fafc !important;
-    width: 100%;
-    font-weight: 400 !important;
+/* --- Universal Font Reset & Dashicon Safeguard --- */
+.smlms-single-course-page,
+.smlms-single-course-page *,
+.smlms-video-modal,
+.smlms-video-modal * {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif !important;
+    box-sizing: border-box !important;
 }
 
-.smlms-single-course-page button,
-.smlms-single-course-page input,
-.smlms-single-course-page select,
-.smlms-single-course-page textarea {
-    font-family: 'Poppins', sans-serif !important;
-}
-
-/* --- Strict Dashicons Restoration --- */
 .smlms-single-course-page .dashicons,
-.smlms-single-course-page span.dashicons {
-    font-family: "dashicons" !important;
-    font-style: normal !important;
-    font-weight: normal !important;
-    font-variant: normal !important;
-    text-transform: none !important;
-    line-height: 1 !important;
+.smlms-video-modal .dashicons,
+span.dashicons {
+    font-family: 'dashicons' !important;
     display: inline-block !important;
-    text-align: center !important;
-    vertical-align: middle !important;
+    line-height: 1 !important;
+    font-weight: 400 !important;
+    font-style: normal !important;
+    text-decoration: inherit !important;
+    text-transform: none !important;
+    text-rendering: auto !important;
     -webkit-font-smoothing: antialiased !important;
     -moz-osx-font-smoothing: grayscale !important;
+}
+
+.smlms-single-course-page {
+    color: #334155 !important;
+    background-color: #f8fafc !important;
+    width: 100% !important;
+    font-weight: 400 !important;
 }
 
 /* --- Purple Hero Banner --- */
 .smlms-hero-banner {
     background-color: #5d0059 !important;
     color: #ffffff !important;
-    padding: 184px 0 60px 0 !important;
+    padding: 160px 0 90px 0 !important;
     position: relative !important;
 }
 
@@ -55,7 +54,6 @@
     max-width: 720px !important;
 }
 
-/* Breadcrumbs */
 .smlms-breadcrumbs {
     font-size: 13px !important;
     font-weight: 400 !important;
@@ -64,7 +62,6 @@
     display: flex !important;
     align-items: center !important;
     gap: 6px !important;
-    flex-wrap: wrap !important;
 }
 
 .smlms-breadcrumbs a {
@@ -72,15 +69,10 @@
     text-decoration: none !important;
 }
 
-.smlms-breadcrumbs a:hover {
-    text-decoration: underline !important;
-}
-
-/* Course Title (Preserved font-weight: 600) */
 .smlms-course-title {
     color: #ffffff !important;
     font-size: 32px !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     line-height: 1.25 !important;
     margin: 0 0 20px 0 !important;
 }
@@ -92,7 +84,14 @@
     align-items: center !important;
     gap: 18px !important;
     font-size: 14px !important;
-    font-weight: 400 !important;
+    color: #ffffff !important;
+}
+
+.smlms-hero-meta,
+.smlms-hero-meta *,
+.smlms-meta-item,
+.smlms-meta-item strong,
+.smlms-meta-item span {
     color: #ffffff !important;
 }
 
@@ -100,39 +99,38 @@
     display: flex !important;
     align-items: center !important;
     gap: 6px !important;
-    color: #ffffff !important;
-    font-weight: 400 !important;
-}
-
-.smlms-meta-item strong {
-    font-weight: 600 !important;
-    color: #ffffff !important;
 }
 
 .smlms-meta-item .dashicons {
-    color: #f59e0b !important;
-    font-size: 17px !important;
-    width: 17px !important;
-    height: 17px !important;
+    color: #e4125d !important;
+    font-size: 16px !important;
+    width: 16px !important;
+    height: 16px !important;
 }
 
-/* Hero Author Link */
 .smlms-hero-author-link {
     color: #ffffff !important;
     font-weight: 600 !important;
     text-decoration: underline !important;
-    transition: opacity 0.2s ease !important;
+    transition: opacity 0.15s ease !important;
 }
 
 .smlms-hero-author-link:hover {
-    color: #ffffff !important;
     opacity: 0.85 !important;
-    text-decoration: none !important;
+    color: #ffffff !important;
 }
 
-/* --- Media Preview Components --- */
-.smlms-mobile-media-preview {
-    display: none;
+/* --- Right Side Card (Desktop View) --- */
+.smlms-hero-right-card {
+    position: absolute !important;
+    right: 20px !important;
+    top: 45px !important;
+    z-index: 100 !important;
+    width: 360px !important;
+    background: #ffffff !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18) !important;
+    overflow: hidden !important;
 }
 
 .smlms-card-preview-media {
@@ -143,7 +141,7 @@
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    border-radius: 8px 8px 0 0 !important;
+    cursor: pointer !important;
     overflow: hidden !important;
 }
 
@@ -156,52 +154,25 @@
 
 .smlms-play-overlay {
     position: absolute !important;
-    width: 58px !important;
-    height: 58px !important;
-    background: rgba(93, 0, 89, 0.85) !important;
+    width: 60px !important;
+    height: 60px !important;
+    background: rgba(0, 0, 0, 0.55) !important;
     border-radius: 50% !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     color: #ffffff !important;
-    border: none !important;
+    border: 2px solid rgba(255, 255, 255, 0.85) !important;
     cursor: pointer !important;
-    transition: transform 0.2s, background 0.2s !important;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
-    z-index: 5 !important;
-}
-
-.smlms-play-overlay:hover {
-    transform: scale(1.1) !important;
-    background: rgba(93, 0, 89, 1) !important;
 }
 
 .smlms-play-overlay .dashicons {
-    font-size: 28px !important;
-    width: 28px !important;
-    height: 28px !important;
-    line-height: 28px !important;
+    font-size: 32px !important;
+    width: 32px !important;
+    height: 32px !important;
+    line-height: 32px !important;
     color: #ffffff !important;
-}
-
-/* --- Side Card & Price Display (Preserved top: 16px) --- */
-.smlms-hero-right-card {
-    width: 360px !important;
-    background: #ffffff !important;
-    border-radius: 12px !important;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
-    overflow: hidden !important;
-    position: absolute !important;
-    right: 20px !important;
-    top: 16px !important;
-    z-index: 100 !important;
-}
-
-.smlms-card-price-display {
-    font-size: 26px !important;
-    font-weight: 600 !important;
-    color: #5d0059 !important;
-    margin-bottom: 8px !important;
+    margin-left: 3px !important;
 }
 
 .smlms-card-actions {
@@ -209,78 +180,79 @@
     display: flex !important;
     flex-direction: column !important;
     gap: 12px !important;
+    background: #ffffff !important;
 }
 
-/* Cyan ENROLL NOW Button */
+.smlms-card-price-display {
+    font-size: 32px !important;
+    font-weight: 700 !important;
+    color: #5d0059 !important;
+    margin-bottom: 6px !important;
+}
+
 .smlms-btn-enroll-now {
     background-color: #00a2e8 !important;
     color: #ffffff !important;
     text-align: center !important;
-    padding: 14px !important;
-    border-radius: 25px !important;
+    padding: 13px 20px !important;
+    border-radius: 30px !important;
+    font-size: 15px !important;
     font-weight: 600 !important;
     text-decoration: none !important;
-    font-size: 14px !important;
-    letter-spacing: 0.5px !important;
-    transition: background 0.2s !important;
     display: block !important;
-    box-shadow: 0 4px 10px rgba(0, 162, 232, 0.25) !important;
-}
-
-.smlms-btn-enroll-now:hover {
-    background-color: #0284c7 !important;
-    color: #ffffff !important;
 }
 
 .smlms-btn-start-course {
     background-color: #5d0059 !important;
     color: #ffffff !important;
     text-align: center !important;
-    padding: 14px !important;
-    border-radius: 25px !important;
+    padding: 13px 20px !important;
+    border-radius: 30px !important;
+    font-size: 15px !important;
     font-weight: 600 !important;
     text-decoration: none !important;
-    font-size: 14px !important;
-    letter-spacing: 0.5px !important;
-    transition: background 0.2s !important;
     display: block !important;
-}
-
-.smlms-btn-start-course:hover {
-    background-color: #4a0047 !important;
-    color: #ffffff !important;
 }
 
 .smlms-btn-share-course {
     background-color: #5d0059 !important;
     color: #ffffff !important;
     border: none !important;
-    padding: 14px !important;
-    border-radius: 25px !important;
+    padding: 13px 20px !important;
+    border-radius: 30px !important;
+    font-size: 14px !important;
     font-weight: 600 !important;
     cursor: pointer !important;
-    font-size: 14px !important;
-    letter-spacing: 0.5px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     gap: 8px !important;
-    transition: background 0.2s !important;
 }
 
 .smlms-btn-share-course .dashicons {
-    color: #ffffff !important;
     font-size: 16px !important;
+    width: 16px !important;
+    height: 16px !important;
+    line-height: 16px !important;
+    color: #ffffff !important;
 }
 
-.smlms-btn-share-course:hover {
-    background-color: #4a0047 !important;
+/* Visibility Toggles for Desktop vs Mobile Media Preview */
+.smlms-mobile-media-preview {
+    display: none !important;
 }
 
-/* --- Tabs Header Bar (Border Radius Removed) --- */
+.smlms-desktop-media-preview {
+    display: flex !important;
+}
+
+/* --- Tabs & Main Layout --- */
 .smlms-course-nav-tabs {
     background: #ffffff !important;
     border-bottom: 1px solid #e2e8f0 !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
 }
 
 .smlms-tabs-container {
@@ -289,6 +261,14 @@
     padding: 0 20px !important;
     display: flex !important;
     gap: 10px !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none;
+}
+
+.smlms-tabs-container::-webkit-scrollbar {
+    display: none;
 }
 
 .smlms-course-tab-btn {
@@ -299,18 +279,16 @@
     font-weight: 500 !important;
     color: #64748b !important;
     cursor: pointer !important;
-    border-bottom: 3px solid transparent !important;
-    border-radius: 0 !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
 }
 
 .smlms-course-tab-btn.active {
     color: #ffffff !important;
     background-color: #5d0059 !important;
-    border-radius: 0 !important;
     font-weight: 600 !important;
 }
 
-/* --- Main Content Area --- */
 .smlms-course-body-container {
     max-width: 1200px !important;
     margin: 40px auto !important;
@@ -321,67 +299,79 @@
     max-width: 720px !important;
 }
 
+/* --- Clean Tab Display Controls --- */
 .smlms-course-tab-pane {
-    display: none;
+    display: none !important;
 }
 
 .smlms-course-tab-pane.active {
     display: block !important;
 }
 
-.smlms-curriculum-header {
+/* --- Curriculum Section Design --- */
+.smlms-curriculum-wrapper {
+    margin-top: 10px !important;
+}
+
+.smlms-curriculum-header-row {
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
-    margin-bottom: 20px !important;
+    margin-bottom: 24px !important;
 }
 
-.smlms-curriculum-header h2 {
+.smlms-curriculum-title {
     font-size: 22px !important;
-    font-weight: 600 !important;
-    margin: 0 !important;
+    font-weight: 700 !important;
     color: #0f172a !important;
+    margin: 0 !important;
 }
 
-.smlms-expand-all-btn {
-    background: #00a2e8 !important;
+.smlms-btn-collapse-all {
+    background-color: #00a2e8 !important;
     color: #ffffff !important;
     border: none !important;
-    padding: 8px 18px !important;
+    padding: 8px 20px !important;
     border-radius: 20px !important;
-    font-weight: 600 !important;
     font-size: 13px !important;
+    font-weight: 600 !important;
     cursor: pointer !important;
-    display: flex !important;
+    display: inline-flex !important;
     align-items: center !important;
     gap: 6px !important;
-    box-shadow: 0 2px 6px rgba(0, 162, 232, 0.2) !important;
 }
 
-/* --- Curriculum Lesson Cards & Icons --- */
-.smlms-frontend-lesson-card {
+/* Lesson Card Container */
+.smlms-lesson-card {
     background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
     border-radius: 8px !important;
-    margin-bottom: 12px !important;
+    margin-bottom: 16px !important;
     overflow: visible !important;
+    position: relative !important;
+    z-index: 1 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+}
+
+.smlms-lesson-card:hover {
+    z-index: 10 !important;
 }
 
 .smlms-lesson-card-header {
+    padding: 18px 24px !important;
     display: flex !important;
-    justify-content: space-between !important;
     align-items: center !important;
-    padding: 16px 20px !important;
-    cursor: pointer !important;
+    justify-content: space-between !important;
     background: #ffffff !important;
     border-radius: 8px !important;
+    cursor: pointer !important;
+    user-select: none !important;
 }
 
-.smlms-lesson-title-group {
+.smlms-lesson-title-wrap {
     display: flex !important;
     align-items: center !important;
-    gap: 12px !important;
-    flex: 1 !important;
+    gap: 14px !important;
 }
 
 .smlms-lesson-icon {
@@ -391,279 +381,301 @@
     height: 20px !important;
 }
 
-.smlms-play-circle-icon {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 22px !important;
-    height: 22px !important;
-    border-radius: 50% !important;
-    background-color: #5d0059 !important;
-    color: #ffffff !important;
-    flex-shrink: 0 !important;
-}
-
-.smlms-play-circle-icon .dashicons {
-    font-size: 13px !important;
-    width: 13px !important;
-    height: 13px !important;
-    line-height: 13px !important;
-    color: #ffffff !important;
-    margin-left: 1px !important;
-}
-
-.smlms-lesson-name {
+.smlms-lesson-link,
+.smlms-lesson-locked-title {
+    color: #334155 !important;
     font-size: 15px !important;
-    color: #0f172a !important;
-    font-weight: 500 !important; /* Normalized from 600/700 */
+    font-weight: 600 !important;
     text-decoration: none !important;
 }
 
-.smlms-lesson-meta-group {
+.smlms-lesson-meta-wrap {
     display: flex !important;
     align-items: center !important;
     gap: 12px !important;
 }
 
-.smlms-topic-badge-count {
+.smlms-badge-sample {
+    background: #e0f2fe !important;
+    color: #0284c7 !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 3px 10px !important;
+    border-radius: 12px !important;
+}
+
+.smlms-topic-count {
     font-size: 13px !important;
     color: #64748b !important;
     font-weight: 500 !important;
 }
 
-.smlms-accordion-circle {
-    width: 24px !important;
-    height: 24px !important;
+.smlms-status-circle-icon {
+    width: 18px !important;
+    height: 18px !important;
+    border: 1px solid #cbd5e1 !important;
     border-radius: 50% !important;
-    background: #f1f5f9 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 10px !important;
-    color: #475569 !important;
+    display: inline-block !important;
 }
 
-/* Sample Lesson & Topic Badges (Positioned on the Right Side) */
-.smlms-sample-badge {
-    background-color: #e0f2fe !important;
-    color: #0284c7 !important;
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    padding: 3px 10px !important;
-    border-radius: 12px !important;
-    text-transform: uppercase !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 4px !important;
-    margin: 0 !important;
-}
-
-.smlms-sample-badge .dashicons {
-    font-size: 12px !important;
-    width: 12px !important;
-    height: 12px !important;
-    color: #0284c7 !important;
-}
-
-/* --- LearnDash Hover Lock Tooltip Replica --- */
-.smlms-lock-tooltip-wrap {
+.smlms-lesson-card-body {
+    background: #ffffff !important;
+    overflow: visible !important;
     position: relative !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    cursor: pointer !important;
 }
 
-.smlms-lock-tooltip-wrap .dashicons-lock {
-    color: #94a3b8 !important;
-    font-size: 16px !important;
-    width: 16px !important;
-    height: 16px !important;
-}
-
-.smlms-lock-tooltip-wrap .smlms-tooltip-text {
-    visibility: hidden;
-    width: max-content;
-    max-width: 280px;
-    background-color: #00a2e8 !important;
-    color: #ffffff !important;
-    text-align: center;
-    border-radius: 4px;
-    padding: 7px 12px;
-    position: absolute;
-    z-index: 999;
-    bottom: 135%;
-    right: 50%;
-    transform: translateX(50%);
-    font-size: 11px;
-    font-weight: 500;
-    opacity: 0;
-    transition: opacity 0.2s, visibility 0.2s;
-    white-space: nowrap;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    pointer-events: none;
-}
-
-.smlms-lock-tooltip-wrap .smlms-tooltip-text::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: #00a2e8 transparent transparent transparent;
-}
-
-.smlms-lock-tooltip-wrap:hover .smlms-tooltip-text {
-    visibility: visible;
-    opacity: 1;
-}
-
-/* Topics Accordion List */
-.smlms-frontend-topic-list {
+.smlms-topic-list-group {
     list-style: none !important;
     margin: 0 !important;
     padding: 0 !important;
     border-top: 1px solid #f1f5f9 !important;
 }
 
-.smlms-frontend-topic-item a {
+.smlms-topic-item {
+    padding: 14px 24px 14px 28px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    padding: 12px 20px 12px 48px !important;
-    color: #334155 !important;
-    text-decoration: none !important;
-    font-size: 14px !important;
-    font-weight: 400 !important; /* Normalized from 500 */
     border-bottom: 1px solid #f8fafc !important;
-}
-
-.smlms-frontend-topic-item a:hover {
-    background-color: #f1f5f9 !important;
-    color: #5d0059 !important;
-}
-
-.smlms-topic-left {
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
-}
-
-.smlms-topic-right {
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
-}
-
-.smlms-duration-tag {
-    color: #64748b !important;
-    font-size: 13px !important;
-    font-weight: 400 !important;
-}
-
-.smlms-instructor-card {
-    display: flex !important;
-    gap: 20px !important;
     background: #ffffff !important;
-    padding: 24px !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+.smlms-topic-item:hover {
+    z-index: 10 !important;
+}
+
+.smlms-topic-item:last-child {
+    border-bottom: none !important;
+    border-bottom-left-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+}
+
+.smlms-topic-title-wrap {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+	padding-left:30px;
+}
+
+.smlms-topic-play-icon {
+    width: 18px !important;
+    height: 18px !important;
+    background-color: #5d0059 !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #ffffff !important;
+    flex-shrink: 0 !important;
+}
+
+.smlms-topic-play-icon .dashicons {
+    font-size: 11px !important;
+    width: 11px !important;
+    height: 11px !important;
+    line-height: 11px !important;
+    color: #ffffff !important;
+    margin-left: 1px !important;
+}
+
+.smlms-topic-link,
+.smlms-topic-locked-title {
+    color: #334155 !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+}
+
+.smlms-topic-meta-wrap {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+}
+
+.smlms-topic-duration {
+    font-size: 13px !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+}
+
+.smlms-lock-icon {
+    color: #64748b !important;
+    font-size: 16px !important;
+    width: 16px !important;
+    height: 16px !important;
+}
+
+/* --- Cyan Tooltip for Lessons and Topics --- */
+.smlms-tooltip-holder {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    cursor: pointer !important;
+}
+
+.smlms-tooltip-holder .smlms-tooltip-text {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    position: absolute !important;
+    bottom: calc(100% + 10px) !important;
+    right: -8px !important;
+    background-color: #00a2e8 !important;
+    color: #ffffff !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    padding: 6px 14px !important;
+    border-radius: 6px !important;
+    white-space: nowrap !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16) !important;
+    z-index: 999999 !important;
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease !important;
+    transform: translateY(4px) !important;
+    pointer-events: none !important;
+}
+
+.smlms-tooltip-holder .smlms-tooltip-text::after {
+    content: "" !important;
+    position: absolute !important;
+    top: 100% !important;
+    right: 12px !important;
+    border-width: 6px 6px 0 6px !important;
+    border-style: solid !important;
+    border-color: #00a2e8 transparent transparent transparent !important;
+}
+
+.smlms-tooltip-holder:hover .smlms-tooltip-text {
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+/* Lightbox Modal */
+#smlms-video-modal,
+.smlms-video-modal {
+    display: none !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 999999999 !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#smlms-video-modal.active,
+.smlms-video-modal.active {
+    display: flex !important;
+}
+
+.smlms-video-modal-backdrop {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(15, 12, 20, 0.88) !important;
+    z-index: 1 !important;
+    cursor: pointer !important;
+}
+
+.smlms-video-modal-dialog {
+    position: relative !important;
+    width: 90% !important;
+    max-width: 920px !important;
+    z-index: 2 !important;
+    margin: auto !important;
+    border-radius: 8px !important;
+    background: #000000 !important;
+}
+
+.smlms-modal-close-btn {
+    position: absolute !important;
+    top: -42px !important;
+    right: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-size: 38px !important;
+    cursor: pointer !important;
+}
+
+.smlms-video-responsive-wrap {
+    position: relative !important;
+    width: 100% !important;
+    padding-bottom: 56.25% !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    border-radius: 8px !important;
+}
+
+.smlms-video-responsive-wrap iframe {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border: 0 !important;
+}
+
+/* --- Instructor Card Styling --- */
+.smlms-instructor-card-box {
+    background: #ffffff !important;
+    padding: 30px !important;
     border-radius: 8px !important;
     border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
 }
 
-.smlms-instructor-img {
+.smlms-instructor-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 20px !important;
+}
+
+.smlms-instructor-avatar {
     width: 80px !important;
     height: 80px !important;
     border-radius: 50% !important;
     object-fit: cover !important;
 }
 
-/* --- Pop-up Video Modal --- */
-.smlms-video-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 999999;
-    align-items: center;
-    justify-content: center;
+.smlms-instructor-name {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
+    margin: 0 0 4px 0 !important;
+}
+.smlms-instructor-bio {
+    font-size: 14px !important;
+    color: #475569 !important;
+    line-height: 1.6 !important;
+    border-top: 1px solid #f1f5f9 !important;
+    padding-top: 18px !important;
+    margin-top: 18px !important;
 }
 
-.smlms-video-modal.active {
-    display: flex !important;
-}
-
-.smlms-video-modal-backdrop {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(5px);
-}
-
-.smlms-video-modal-dialog {
-    position: relative;
-    width: 90%;
-    max-width: 920px;
-    z-index: 10;
-    background: #000000;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
-}
-
-.smlms-modal-close-btn {
-    position: absolute;
-    top: -42px;
-    right: 0;
-    background: none;
-    border: none;
-    color: #ffffff;
-    font-size: 36px;
-    cursor: pointer;
-    line-height: 1;
-    z-index: 20;
-}
-
-.smlms-video-responsive-wrap {
-    position: relative;
-    padding-bottom: 56.25%;
-    height: 0;
-    overflow: hidden;
-    background: #000000;
-}
-
-.smlms-video-responsive-wrap iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
-}
-
-/* --- Mobile Responsiveness --- */
+/* --- Mobile Responsiveness (max-width: 991px) --- */
 @media screen and (max-width: 991px) {
     .smlms-hero-banner {
-        padding: 60px 0 30px 0 !important;
+        padding: 100px 0 30px 0 !important;
     }
 
     .smlms-hero-container {
         flex-direction: column !important;
+        padding: 0 20px !important;
         gap: 0 !important;
     }
 
-    .smlms-hero-left {
-        max-width: 100% !important;
-    }
-
     .smlms-mobile-media-preview {
-        display: block !important;
-        margin: 15px 0 20px 0 !important;
+        display: flex !important;
+        margin: 20px 0 25px 0 !important;
+        width: 100% !important;
+        height: 220px !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
     }
 
     .smlms-desktop-media-preview {
@@ -675,23 +687,48 @@
         top: auto !important;
         right: auto !important;
         width: 100% !important;
-        max-width: 100% !important;
-        box-shadow: none !important;
-        background: transparent !important;
-        margin-top: 20px !important;
-        z-index: 10 !important;
+        margin-top: 30px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+        background: #ffffff !important;
     }
 
     .smlms-card-actions {
-        padding: 0 !important;
+        padding: 18px 12px !important;
+    }
+
+    .smlms-course-title {
+        font-size: 22px !important;
+    }
+
+    .smlms-card-price-display {
+        font-size: 22px !important;
+    }
+
+    .smlms-btn-enroll-now {
+        padding: 7px 20px !important;
+        font-size: 14px !important;
+    }
+
+    .smlms-lesson-meta-wrap {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: 8px !important;
+    }
+
+    .smlms-lesson-link, 
+    .smlms-lesson-locked-title {
+        font-size: 14px !important;
+        font-weight: 500 !important;
+    }
+
+    .smlms-breadcrumbs {
+        display: flex !important;
+        flex-wrap: wrap !important;
     }
 
     .smlms-tabs-container {
-        overflow-x: auto;
-        white-space: nowrap;
-    }
-
-    .smlms-main-column {
-        max-width: 100% !important;
+        padding: 0 15px !important;
     }
 }

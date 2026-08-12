@@ -1,94 +1,223 @@
-/* --- Sabin Mathew Builder Outer Container --- */
-.smlms-builder-container {
-    background: #ffffff;
+/* --- Dashicons Safeguard --- */
+.dashicons,
+span.dashicons {
+    font-family: 'dashicons' !important;
+    display: inline-block !important;
+    line-height: 1 !important;
+    font-weight: 400 !important;
+    font-style: normal !important;
+    text-decoration: inherit !important;
+    text-transform: none !important;
+    -webkit-font-smoothing: antialiased !important;
+}
+
+/* --- Top Navigation Tabs --- */
+.smlms-admin-tabs-bar {
+    display: flex;
+    gap: 8px;
+    margin: 15px 0 20px 0;
+    border-bottom: 2px solid #cbd5e1;
+    padding-bottom: 0;
+}
+
+.smlms-admin-tab-btn {
+    background: #f1f5f9;
     border: 1px solid #cbd5e1;
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    outline: none;
+    transition: all 0.15s ease;
+}
+
+.smlms-admin-tab-btn:hover {
+    background: #ffffff;
+    color: #00a2e8;
+}
+
+.smlms-admin-tab-btn.active {
+    background: #ffffff;
+    color: #5d0059;
+    border-color: #cbd5e1;
+    border-bottom: 2px solid #ffffff;
+    margin-bottom: -2px;
+    font-weight: 700;
+}
+
+/* --- Course Access & Enrollment Card Grid --- */
+.smlms-access-type-wrapper {
+    padding: 10px 0;
+}
+
+.smlms-access-subtitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 15px;
+}
+
+.smlms-access-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.smlms-access-card {
+    position: relative;
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: block;
+}
+
+.smlms-access-card:hover {
+    border-color: #00a2e8;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+
+.smlms-access-card.active {
+    border-color: #5d0059 !important;
+    background-color: #faf5ff !important;
+}
+
+.smlms-access-card input[type="radio"] {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    margin: 0;
+}
+
+.smlms-access-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.smlms-access-card-header .dashicons {
+    color: #5d0059;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.smlms-access-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.smlms-access-badge {
+    display: inline-block;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.smlms-access-desc {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.smlms-access-field-row {
+    margin-bottom: 20px;
+    max-width: 600px;
+}
+
+.smlms-field-label {
+    display: block;
+    font-weight: 600;
+    font-size: 13px;
+    color: #1e293b;
+    margin-bottom: 6px;
+}
+
+.smlms-input {
+    padding: 8px 12px;
     border-radius: 6px;
-    padding: 20px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    border: 1px solid #cbd5e1;
+}
+
+/* --- Admin Course Builder Tree --- */
+.smlms-builder-wrapper {
+    padding: 5px 0;
 }
 
 .smlms-builder-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 14px;
-    margin-bottom: 16px;
-    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 15px;
 }
 
-.smlms-steps-count {
-    font-weight: 700;
-    font-size: 14px;
-    color: #0f172a;
-}
-
-.smlms-toggle-all {
-    color: #0284c7;
-    text-decoration: none;
-    font-weight: 600;
+.smlms-step-count-label {
     font-size: 13px;
+    color: #475569;
 }
 
-.smlms-toggle-all:hover {
-    text-decoration: underline;
-}
-
-/* Canvas Area */
-.smlms-builder-canvas {
-    background-color: #f8fafc;
+#smlms-course-builder-tree {
+    background: #f8fafc;
     border: 1px dashed #cbd5e1;
-    border-radius: 6px;
-    padding: 16px;
-    min-height: 120px;
+    border-radius: 8px;
+    padding: 20px;
+    min-height: 150px;
 }
 
-.smlms-builder-empty-notice {
-    text-align: center;
-    color: #64748b;
-    padding: 35px 15px;
-    font-size: 14px;
-}
-
-/* --- Lesson Step Cards --- */
-.smlms-builder-lesson-row {
+.smlms-builder-lesson {
     background: #ffffff;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
     overflow: hidden;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.smlms-builder-lesson-row:hover {
-    border-color: #0284c7;
-    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.12);
+.smlms-builder-lesson.selected,
+.smlms-builder-lesson.active-target {
+    border: 2px solid #00a2e8 !important;
+    box-shadow: 0 0 8px rgba(0, 162, 232, 0.25) !important;
 }
 
-.smlms-builder-lesson-row.smlms-active-lesson-row {
-    border-color: #0284c7;
-    border-left: 4px solid #0284c7;
-}
-
-.smlms-builder-row-header {
+.smlms-lesson-bar {
     display: flex;
+    justify-content: space-between;
     align-items: center;
     padding: 12px 16px;
     background: #ffffff;
-    gap: 12px;
-    cursor: pointer;
-    user-select: none;
+    border-bottom: 1px solid #f1f5f9;
 }
 
-.smlms-drag-handle {
+.smlms-lesson-bar-left,
+.smlms-topic-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.handle-icon {
     color: #94a3b8;
-    font-size: 16px;
     cursor: grab;
-    padding: 0 4px;
 }
 
-/* LearnDash "L" and "T" Badges */
-.smlms-badge {
+.smlms-type-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -98,178 +227,84 @@
     font-size: 11px;
     font-weight: 700;
     color: #ffffff;
-    flex-shrink: 0;
 }
 
-.smlms-badge-lesson {
-    background-color: #22c55e; /* Green for Lesson */
+.lesson-badge {
+    background-color: #5d0059;
 }
 
-.smlms-badge-topic {
-    background-color: #0284c7; /* Blue for Topic */
+.topic-badge {
+    background-color: #00a2e8;
 }
 
-.smlms-step-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #0f172a;
-    flex: 1;
-}
-
-.smlms-sub-count {
-    color: #64748b;
-    font-size: 12px;
-    font-weight: 600;
-    margin-right: 6px;
-}
-
-.smlms-remove-step {
-    background: none;
-    border: none;
-    color: #94a3b8;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    padding: 2px 8px;
-    border-radius: 4px;
-    line-height: 1;
-    transition: color 0.2s, background 0.2s;
-}
-
-.smlms-remove-step:hover {
-    color: #ef4444;
-    background: #fee2e2;
-}
-
-.smlms-accordion-arrow {
-    color: #64748b;
-    font-size: 10px;
-    width: 22px;
-    height: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: #f1f5f9;
-}
-
-/* --- Nested Topics Section --- */
-.smlms-builder-topics-body {
+.smlms-builder-topic-list {
+    padding: 10px 16px 15px 40px;
     background: #f8fafc;
-    border-top: 1px solid #e2e8f0;
-    padding: 10px 14px 10px 36px;
+    min-height: 10px;
 }
 
-.smlms-no-topics-notice {
-    color: #94a3b8;
-    font-size: 12px;
-    font-style: italic;
-    margin: 4px 0;
-}
-
-.smlms-builder-topic-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    padding: 8px 12px;
-    margin-bottom: 6px;
-    transition: border-color 0.2s;
-}
-
-.smlms-builder-topic-row:hover {
-    border-color: #0284c7;
-}
-
-.smlms-builder-topic-row span:not(.smlms-badge):not(.smlms-drag-handle) {
-    font-size: 13px;
-    color: #334155;
-    flex: 1;
-}
-
-/* --- Right Sidebar Pickers (Lessons & Topics) --- */
-.smlms-sidebar-picker-box {
-    background: #ffffff;
-    border: 1px solid #c3c4c7;
-    border-radius: 6px;
-    padding: 12px;
-    margin-bottom: 15px;
-}
-
-.smlms-picker-search {
-    margin-bottom: 10px !important;
-    border-radius: 4px !important;
-}
-
-.smlms-picker-items {
-    max-height: 180px;
-    overflow-y: auto;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    padding: 4px;
-    margin-bottom: 12px;
-    background: #ffffff;
-}
-
-.smlms-picker-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
-    border-bottom: 1px solid #f8fafc;
-    cursor: pointer;
-    border-radius: 3px;
-}
-
-.smlms-picker-row:hover {
-    background-color: #f1f5f9;
-}
-
-.smlms-picker-row input[type="checkbox"] {
-    margin: 0 !important;
-}
-
-.smlms-item-title {
-    font-size: 13px;
-    color: #1e293b;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.smlms-picker-footer button {
-    width: 100%;
-    text-align: center;
-    justify-content: center;
-}
-
-/* --- Navigation Header Tabs --- */
-.smlms-admin-header-bar {
+.smlms-builder-topic-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
     background: #ffffff;
-    border-bottom: 1px solid #c3c4c7;
-    padding: 10px 20px;
-    margin: -10px -20px 20px -20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-top: 8px;
 }
 
-.smlms-header-tabs {
-    display: flex;
-    gap: 15px;
-}
-
-.smlms-header-tabs .smlms-tab {
-    padding: 8px 16px;
-    text-decoration: none;
+.smlms-remove-topic-btn {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    font-size: 12px;
+    cursor: pointer;
     font-weight: 600;
-    color: #0284c7;
-    border-bottom: 3px solid transparent;
 }
 
-.smlms-header-tabs .smlms-tab.active {
-    color: #0284c7;
-    border-bottom-color: #0284c7;
+/* Sidebar Picker Panels */
+.smlms-picker-wrapper {
+    padding: 5px 0;
+}
+
+.smlms-picker-search {
+    margin-bottom: 10px !important;
+}
+
+.smlms-picker-box {
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 10px;
+    background: #ffffff;
+    margin-bottom: 12px;
+}
+
+.smlms-picker-box label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: #334155;
+    cursor: pointer;
+}
+
+.smlms-picker-box label:last-child {
+    margin-bottom: 0;
+}
+
+.smlms-btn-purple {
+    background: #b01b59 !important;
+    border-color: #b01b59 !important;
+    color: #ffffff !important;
+    width: 100% !important;
+    text-align: center !important;
+}
+
+.smlms-btn-purple:hover {
+    background: #8e1246 !important;
+    border-color: #8e1246 !important;
 }
