@@ -220,10 +220,10 @@ if (!empty($hierarchy)) {
         <aside class="smlms-focus-sidebar" id="smlms-focus-sidebar">
             <?php if ($course_id): ?>
                 <div class="smlms-sidebar-header-box">
-                    <div class="smlms-sidebar-header-title-wrap">
+                    <a href="<?php echo esc_url(get_permalink($course_id)); ?>" class="smlms-sidebar-header-title-wrap" title="<?php echo esc_attr(get_the_title($course_id)); ?>">
                         <span class="dashicons dashicons-welcome-learn-more smlms-sidebar-header-icon"></span>
                         <span class="smlms-sidebar-course-name"><?php echo esc_html(get_the_title($course_id)); ?></span>
-                    </div>
+                    </a>
                     <button type="button" id="smlms-sidebar-collapse-btn" class="smlms-sidebar-collapse-btn" title="Hide Sidebar">
                         <span class="dashicons dashicons-arrow-left-alt2"></span>
                     </button>

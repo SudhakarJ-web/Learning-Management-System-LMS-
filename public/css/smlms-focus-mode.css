@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
 
-/* --- Strict High-Specificity Layout Overrides --- */
+/* Universal Focus Mode Container Limits */
 html, body.smlms-focus-canvas-body {
     margin: 0 !important;
     padding: 0 !important;
@@ -175,11 +175,11 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-stage-split {
     overflow-x: hidden !important;
 }
 
-/* --- Sidebar Styling --- */
+/* --- Sidebar Styling with Permanent Black Right Border --- */
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-sidebar {
     width: 320px !important;
     background: #ffffff !important;
-    border-right: 1px solid #e2e8f0 !important;
+    border-right: 1px solid #000000 !important;
     flex-shrink: 0 !important;
     display: flex !important;
     flex-direction: column !important;
@@ -189,9 +189,10 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-sidebar {
     z-index: 10 !important;
 }
 
+/* When collapsed, keep opacity:1 so the 1px black border line stays visible on screen edge */
 body.smlms-focus-canvas-body #smlms-focus-app.sidebar-collapsed .smlms-focus-sidebar {
-    margin-left: -320px !important;
-    opacity: 0 !important;
+    margin-left: -319px !important;
+    opacity: 1 !important;
     pointer-events: none !important;
 }
 
@@ -206,11 +207,18 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-header-box {
     gap: 12px !important;
 }
 
-body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-header-title-wrap {
+body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-header-title-wrap,
+body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-header-title-wrap:visited {
     display: flex !important;
     align-items: center !important;
     gap: 10px !important;
     flex: 1 !important;
+    color: #ffffff !important;
+    text-decoration: none !important;
+}
+
+body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-header-title-wrap:hover .smlms-sidebar-course-name {
+    text-decoration: underline !important;
 }
 
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-header-icon {
@@ -260,6 +268,7 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-expand-tab {
     height: 60px !important;
     background: #00a2e8 !important;
     border: none !important;
+    border-right: 1px solid #000000 !important;
     align-items: center !important;
     justify-content: center !important;
     cursor: pointer !important;
@@ -359,7 +368,7 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-title-link.active-t
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-locked-title {
     font-size: 13px !important;
     font-weight: 600 !important;
-    color: #000 !important;
+    color: #94a3b8 !important;
     line-height: 1.4 !important;
 }
 
@@ -400,7 +409,7 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-toggle-btn.open .da
 
 /* Child Topic Rows Indentation */
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-topic-sublist .smlms-sidebar-row {
-    padding-left: 42px !important;
+    padding-left: 32px !important;
     background: #ffffff !important;
 }
 
@@ -727,6 +736,7 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-backdrop {
         box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2) !important;
         opacity: 1 !important;
         pointer-events: auto !important;
+        border-right: 1px solid #000000 !important;
     }
 
     body.smlms-focus-canvas-body #smlms-focus-app.drawer-open .smlms-focus-sidebar {
@@ -805,5 +815,5 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-backdrop {
 
     body.smlms-focus-canvas-body #smlms-focus-app .smlms-footer-col.right {
         order: 1 !important;
-    }	
+    }
 }
