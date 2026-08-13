@@ -5,6 +5,9 @@
 
 if (!defined('ABSPATH')) exit;
 
+// Suppress Jetpack Related Posts & Sharing Injections in Focus Mode
+add_filter('jetpack_relatedposts_filter_enabled', '__return_false');
+
 $post_id   = get_the_ID();
 $user_id   = get_current_user_id();
 $post_type = get_post_type($post_id);
@@ -16,6 +19,10 @@ $hierarchy = $course_id ? SMLMS_DB::get_course_hierarchy($course_id, $user_id) :
 
 // Course Access Mode Lookup
 $access_type = $course_id ? (get_post_meta($course_id, '_smlms_access_type', true) ?: 'closed') : 'closed';
+
+// Check Enrollment / Purchaser Status
+$is_enrolled  = ($user_id > 0 && $course_id) ? SMLMS_DB::is_user_enrolled($user_id, $course_id) : false;
+$is_purchaser = ($user_id > 0) && ($is_enrolled || current_user_can('manage_options'));
 
 // Sample Status Check
 $is_sample = false;
@@ -32,9 +39,9 @@ if ($is_lesson) {
 if ($access_type === 'open') {
     $has_access = true;
 } elseif ($access_type === 'free') {
-    $has_access = ($user_id > 0) && ($is_sample || current_user_can('manage_options') || ($course_id && SMLMS_DB::is_user_enrolled($user_id, $course_id)));
+    $has_access = ($user_id > 0) && ($is_sample || current_user_can('manage_options') || $is_enrolled);
 } else {
-    $has_access = $is_sample || current_user_can('manage_options') || ($course_id && SMLMS_DB::is_user_enrolled($user_id, $course_id));
+    $has_access = $is_sample || current_user_can('manage_options') || $is_enrolled;
 }
 
 // Check Materials Availability
@@ -67,33 +74,78 @@ if (!empty($video_url)) {
     }
 }
 
-// Linear Sequence Calculation for Previous / Next Step Navigation
-$all_steps = [];
-$parent_lesson_url = '';
+// Linear Sequence Calculation & Hierarchy Indexing
+$all_steps            = [];
+$valid_step_ids       = [];
+$total_steps_count    = 0;
+$parent_lesson_url    = '';
+$parent_lesson_title  = '';
+$parent_l_number      = 1;
+$topic_number         = 1;
+
 if (!empty($hierarchy)) {
-    foreach ($hierarchy as $l_item) {
+    foreach ($hierarchy as $l_i => $l_item) {
+        $l_id    = $l_item['lesson_id'];
+        $l_video = get_post_meta($l_id, '_smlms_video_id', true) ?: get_post_meta($l_id, '_smlms_media_embed', true);
+        
+        if ($l_id == $post_id) {
+            $parent_l_number     = $l_i + 1;
+            $parent_lesson_title = $l_item['lesson_title'];
+            $parent_lesson_url   = $l_item['permalink'];
+        }
+
         $all_steps[] = [
-            'id'    => $l_item['lesson_id'],
+            'id'    => $l_id,
             'url'   => $l_item['permalink'],
             'type'  => 'lesson',
             'title' => $l_item['lesson_title']
         ];
+
+        if (!empty(trim((string)$l_video))) {
+            $total_steps_count++;
+            $valid_step_ids[] = $l_id;
+        }
+
         if (!empty($l_item['topics'])) {
-            foreach ($l_item['topics'] as $t_item) {
+            foreach ($l_item['topics'] as $t_i => $t_item) {
                 if ($t_item['id'] == $post_id) {
-                    $parent_lesson_url = $l_item['permalink'];
+                    $parent_l_number     = $l_i + 1;
+                    $topic_number        = $t_i + 1;
+                    $parent_lesson_title = $l_item['lesson_title'];
+                    $parent_lesson_url   = $l_item['permalink'];
                 }
+
                 $all_steps[] = [
                     'id'    => $t_item['id'],
                     'url'   => $t_item['permalink'],
                     'type'  => 'topic',
                     'title' => $t_item['title']
                 ];
+
+                $total_steps_count++;
+                $valid_step_ids[] = $t_item['id'];
             }
         }
     }
 }
 
+// Construct Display Title with Dynamic Prefix
+$raw_title = get_the_title();
+if ($is_lesson) {
+    if (preg_match('/^\d+\.\s*/', $raw_title)) {
+        $display_title = $raw_title;
+    } else {
+        $display_title = $parent_l_number . '. ' . $raw_title;
+    }
+} else {
+    if (preg_match('/^\d+\.\d+\s*/', $raw_title)) {
+        $display_title = $raw_title;
+    } else {
+        $display_title = $parent_l_number . '.' . $topic_number . ' ' . $raw_title;
+    }
+}
+
+// Navigation Step Targets
 $next_step_url   = '';
 $next_step_label = '';
 $prev_step_url   = '';
@@ -120,19 +172,23 @@ if ($current_idx !== -1) {
     }
 }
 
+// User Step Completion Calculation
+$user_completed_ids = ($user_id > 0 && $course_id) ? SMLMS_DB::get_user_completed_steps($user_id, $course_id) : [];
+
+$completed_steps_count = 0;
+foreach ($valid_step_ids as $v_step_id) {
+    if (in_array($v_step_id, $user_completed_ids)) {
+        $completed_steps_count++;
+    }
+}
+
+$progress_percentage  = ($total_steps_count > 0) ? round(($completed_steps_count / $total_steps_count) * 100) : 0;
+$is_current_completed = in_array($post_id, $user_completed_ids);
+
 // Fetch Child Topics for Current Lesson
 $lesson_topics = $is_lesson ? SMLMS_DB::get_lesson_topics($post_id) : [];
 
-// Determine Parent Lesson Number
-$parent_l_number = 1;
-if (!empty($hierarchy)) {
-    foreach ($hierarchy as $l_i => $l_node) {
-        if ($l_node['lesson_id'] == $post_id) {
-            $parent_l_number = $l_i + 1;
-            break;
-        }
-    }
-}
+$post_body_raw = trim(get_post_field('post_content', $post_id));
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -159,24 +215,28 @@ if (!empty($hierarchy)) {
             </a>
         </div>
 
-        <div class="smlms-topbar-center smlms-desktop-only">
-            <div class="smlms-progress-widget">
-                <span class="smlms-progress-label">0% COMPLETE</span>
-                <div class="smlms-progress-track">
-                    <div class="smlms-progress-fill" style="width: 0%;"></div>
+        <!-- Centered Progress Controls -->
+        <?php if ($is_purchaser): ?>
+            <div class="smlms-topbar-center">
+                <div class="smlms-progress-widget">
+                    <span class="smlms-progress-label" id="smlms-progress-label"><?php echo esc_html($progress_percentage); ?>% COMPLETE</span>
+                    <div class="smlms-progress-track">
+                        <div class="smlms-progress-fill" id="smlms-progress-fill" style="width: <?php echo esc_attr($progress_percentage); ?>%;"></div>
+                    </div>
+                    <span class="smlms-progress-count" id="smlms-progress-count"><?php echo esc_html($completed_steps_count . '/' . $total_steps_count); ?> Steps</span>
                 </div>
-                <span class="smlms-progress-count">0/2 Steps</span>
+
+                <button type="button" class="smlms-btn-mark-complete-toggle <?php echo $is_current_completed ? 'completed' : ''; ?>" data-post-id="<?php echo esc_attr($post_id); ?>" data-course-id="<?php echo esc_attr($course_id); ?>">
+                    <span class="smlms-btn-text"><?php echo $is_current_completed ? 'Mark Incomplete' : 'Mark Complete'; ?></span>
+                    <span class="dashicons <?php echo $is_current_completed ? 'dashicons-yes-alt' : 'dashicons-yes'; ?>"></span>
+                </button>
             </div>
-            <button type="button" class="smlms-btn-header-complete">Mark Complete</button>
-        </div>
+        <?php else: ?>
+            <div class="smlms-topbar-center"></div>
+        <?php endif; ?>
 
+        <!-- Right Header User Greeting -->
         <div class="smlms-topbar-right">
-            <?php if (!empty($next_step_url)): ?>
-                <a href="<?php echo esc_url($next_step_url); ?>" class="smlms-topbar-next-link smlms-desktop-only">
-                    <?php echo esc_html($next_step_label); ?> &gt;
-                </a>
-            <?php endif; ?>
-
             <?php if ($user_id): $user = wp_get_current_user(); ?>
                 <span class="smlms-user-greeting smlms-desktop-only">Hello, <strong><?php echo esc_html($user->display_name); ?></strong>!</span>
                 <img src="<?php echo esc_url(get_avatar_url($user_id, ['size' => 32])); ?>" class="smlms-user-avatar" alt="Avatar">
@@ -185,24 +245,6 @@ if (!empty($hierarchy)) {
             <?php endif; ?>
         </div>
     </header>
-
-    <!-- Mobile Sub-Navigation Row -->
-    <div class="smlms-focus-mobile-subnav">
-        <div class="smlms-mobile-subnav-col left">
-            <?php if (!empty($prev_step_url)): ?>
-                <a href="<?php echo esc_url($prev_step_url); ?>" class="smlms-mobile-subnav-link">
-                    &lt; <?php echo esc_html($prev_step_label); ?>
-                </a>
-            <?php endif; ?>
-        </div>
-        <div class="smlms-mobile-subnav-col right">
-            <?php if (!empty($next_step_url)): ?>
-                <a href="<?php echo esc_url($next_step_url); ?>" class="smlms-mobile-subnav-link">
-                    <?php echo esc_html($next_step_label); ?> &gt;
-                </a>
-            <?php endif; ?>
-        </div>
-    </div>
 
     <div class="smlms-focus-stage-split">
         
@@ -239,7 +281,7 @@ if (!empty($hierarchy)) {
         <main class="smlms-focus-main-stage">
             <div class="smlms-focus-stage-inner">
                 
-                <h1 class="smlms-step-main-title"><?php echo $parent_l_number . '. ' . esc_html(get_the_title()); ?></h1>
+                <h1 class="smlms-step-main-title"><?php echo esc_html($display_title); ?></h1>
 
                 <?php if (!$has_access): ?>
                     <div class="smlms-access-restricted-box">
@@ -252,12 +294,28 @@ if (!empty($hierarchy)) {
                     </div>
                 <?php else: ?>
 
-                    <!-- Light Blue/Grey Breadcrumb Banner -->
+                    <!-- Full Hierarchy Breadcrumb Banner -->
                     <div class="smlms-focus-breadcrumb-banner">
-                        <?php if ($course_id): ?>
-                            <a href="<?php echo esc_url(get_permalink($course_id)); ?>"><?php echo esc_html(get_the_title($course_id)); ?></a> &gt; 
-                        <?php endif; ?>
-                        <span><?php echo $parent_l_number . '. ' . esc_html(get_the_title()); ?></span>
+                        <div class="smlms-breadcrumb-links">
+                            <?php if ($course_id): ?>
+                                <a href="<?php echo esc_url(get_permalink($course_id)); ?>"><?php echo esc_html(get_the_title($course_id)); ?></a> &gt; 
+                            <?php endif; ?>
+
+                            <?php if (!$is_lesson && !empty($parent_lesson_title)): ?>
+                                <a href="<?php echo esc_url($parent_lesson_url); ?>">
+                                    <?php 
+                                    $parent_l_display = preg_match('/^\d+\.\s*/', $parent_lesson_title) ? $parent_lesson_title : ($parent_l_number . '. ' . $parent_lesson_title);
+                                    echo esc_html($parent_l_display); 
+                                    ?>
+                                </a> &gt; 
+                            <?php endif; ?>
+
+                            <span><?php echo esc_html($display_title); ?></span>
+                        </div>
+
+                        <span class="smlms-status-pill <?php echo $is_current_completed ? 'completed' : 'in-progress'; ?>">
+                            <?php echo $is_current_completed ? 'COMPLETED' : 'IN PROGRESS'; ?>
+                        </span>
                     </div>
 
                     <!-- Tabs Bar: ONLY Rendered if Materials Exist -->
@@ -283,13 +341,23 @@ if (!empty($hierarchy)) {
                             <?php endif; ?>
 
                             <!-- Entry Content -->
-                            <div class="smlms-focus-body-content">
-                                <?php 
-                                while (have_posts()) : the_post();
-                                    the_content();
-                                endwhile;
-                                ?>
-                            </div>
+                            <?php 
+                            ob_start();
+                            while (have_posts()) : the_post();
+                                the_content();
+                            endwhile;
+                            $content_output = ob_get_clean();
+
+                            $content_output = preg_replace('/<div[^>]*id="jp-relatedposts"[^>]*>.*?<\/div>/s', '', $content_output);
+                            $content_output = preg_replace('/<div[^>]*class="[^"]*jp-relatedposts[^"]*"[^>]*>.*?<\/div>/s', '', $content_output);
+                            $content_output = preg_replace('/<p>\s*(?:&nbsp;|\s)*<\/p>/i', '', $content_output);
+                            $content_output = trim($content_output);
+
+                            if (!empty($content_output)): ?>
+                                <div class="smlms-focus-body-content">
+                                    <?php echo $content_output; ?>
+                                </div>
+                            <?php endif; ?>
 
                             <!-- Dedicated Child Topics List Card -->
                             <?php if ($is_lesson && !empty($lesson_topics)): ?>
@@ -315,7 +383,7 @@ if (!empty($hierarchy)) {
 
                                                 <div class="smlms-lesson-topic-right">
                                                     <span class="smlms-topic-duration"><?php echo esc_html($t_duration); ?></span>
-                                                    <span class="smlms-status-circle"></span>
+                                                    <span class="smlms-status-circle <?php echo in_array($t_id, $user_completed_ids) ? 'active-circle' : ''; ?>"></span>
                                                 </div>
                                             </li>
                                         <?php endforeach; ?>
@@ -359,10 +427,6 @@ if (!empty($hierarchy)) {
                                 <a href="<?php echo esc_url($next_step_url); ?>" class="smlms-btn-pill-cyan">
                                     <?php echo esc_html($next_step_label); ?> &gt;
                                 </a>
-                            <?php else: ?>
-                                <button type="button" class="smlms-btn-mark-complete">
-                                    Mark Complete &#10003;
-                                </button>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -378,8 +442,10 @@ if (!empty($hierarchy)) {
 <script>
 jQuery(document).ready(function($) {
     const focusApp = $('#smlms-focus-app');
+    const ajaxUrl  = '<?php echo esc_url(admin_url('admin-ajax.php')); ?>';
+    const nonce    = '<?php echo wp_create_nonce('smlms_progress_nonce'); ?>';
 
-    // Default desktop state: Sidebar OPEN unless user explicitly collapsed it
+    // Sidebar State Restoration
     if ($(window).width() > 768) {
         if (localStorage.getItem('smlms_sidebar_collapsed') === 'true') {
             focusApp.addClass('sidebar-collapsed');
@@ -425,7 +491,67 @@ jQuery(document).ready(function($) {
         $(this).toggleClass('open');
     });
 
-    // Ensure all Materials links & PDFs open cleanly and are downloadable
+    // Interactive Mark Complete AJAX Handler
+    $(document).on('click', '.smlms-btn-mark-complete-toggle', function(e) {
+        e.preventDefault();
+        var btn = $(this);
+        var postId   = btn.data('post-id');
+        var courseId = btn.data('course-id');
+
+        btn.prop('disabled', true);
+
+        $.ajax({
+            url: ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'smlms_toggle_step_complete',
+                post_id: postId,
+                course_id: courseId,
+                _wpnonce: nonce
+            },
+            success: function(response) {
+                btn.prop('disabled', false);
+                if (response.success) {
+                    var data = response.data;
+                    
+                    // Update Progress Widgets
+                    $('#smlms-progress-label').text(data.percentage + '% COMPLETE');
+                    $('#smlms-progress-fill').css('width', data.percentage + '%');
+                    $('#smlms-progress-count').text(data.completed_count + '/' + data.total_count + ' Steps');
+
+                    // Synchronize Mark Complete buttons & status pill badge
+                    if (data.is_completed) {
+                        $('.smlms-btn-mark-complete-toggle')
+                            .addClass('completed')
+                            .find('.smlms-btn-text').text('Mark Incomplete');
+                        $('.smlms-btn-mark-complete-toggle')
+                            .find('.dashicons').attr('class', 'dashicons dashicons-yes-alt');
+                        
+                        $('.smlms-status-pill')
+                            .removeClass('in-progress')
+                            .addClass('completed')
+                            .text('COMPLETED');
+                    } else {
+                        $('.smlms-btn-mark-complete-toggle')
+                            .removeClass('completed')
+                            .find('.smlms-btn-text').text('Mark Complete');
+                        $('.smlms-btn-mark-complete-toggle')
+                            .find('.dashicons').attr('class', 'dashicons dashicons-yes');
+
+                        $('.smlms-status-pill')
+                            .removeClass('completed')
+                            .addClass('in-progress')
+                            .text('IN PROGRESS');
+                    }
+                }
+            },
+            error: function() {
+                btn.prop('disabled', false);
+            }
+        });
+    });
+
+    // Downloadable Links Handler
     $('.smlms-materials-body-box a').each(function() {
         var href = $(this).attr('href');
         if (href) {

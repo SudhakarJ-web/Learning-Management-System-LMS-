@@ -227,4 +227,85 @@ class SMLMS_DB {
             intval($course_id)
         )));
     }
+
+    /**
+     * Get total unique enrolled students count
+     */
+    public static function get_total_students_count() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'smlms_enrollments';
+
+        // Unique enrolled users in DB
+        $db_count = intval($wpdb->get_var("SELECT COUNT(DISTINCT user_id) FROM {$table_name}"));
+
+        // Sum manual offset across published courses if configured
+        $manual_offsets = $wpdb->get_var("
+            SELECT SUM(CAST(meta_value AS UNSIGNED)) 
+            FROM {$wpdb->postmeta} 
+            WHERE meta_key = '_smlms_students_enrolled'
+        ");
+
+        return $db_count + intval($manual_offsets);
+    }
+
+    /**
+     * Get total published courses count
+     */
+    public static function get_total_courses_count() {
+        $counts = wp_count_posts('smlms_course');
+        return intval($counts->publish ?? 0);
+    }
+
+    /**
+     * Get total published lessons count
+     */
+    public static function get_total_lessons_count() {
+        $counts = wp_count_posts('smlms_lesson');
+        return intval($counts->publish ?? 0);
+    }
+
+    /**
+     * Get total published topics count
+     */
+    public static function get_total_topics_count() {
+        $counts = wp_count_posts('smlms_topic');
+        return intval($counts->publish ?? 0);
+    }
+	
+	/**
+     * Get user completed step IDs for a specific course
+     */
+    public static function get_user_completed_steps($user_id, $course_id) {
+        $user_id   = intval($user_id);
+        $course_id = intval($course_id);
+        if (!$user_id || !$course_id) return [];
+
+        $completed = get_user_meta($user_id, '_smlms_completed_steps_' . $course_id, true);
+        return is_array($completed) ? array_map('intval', $completed) : [];
+    }
+
+    /**
+     * Toggle step completion status for a user
+     */
+    public static function toggle_step_completion($user_id, $course_id, $step_id) {
+        $user_id   = intval($user_id);
+        $course_id = intval($course_id);
+        $step_id   = intval($step_id);
+
+        if (!$user_id || !$course_id || !$step_id) return false;
+
+        $completed = self::get_user_completed_steps($user_id, $course_id);
+        $is_completed = in_array($step_id, $completed);
+
+        if ($is_completed) {
+            $completed = array_diff($completed, [$step_id]);
+        } else {
+            $completed[] = $step_id;
+        }
+
+        $completed = array_values(array_unique($completed));
+        update_user_meta($user_id, '_smlms_completed_steps_' . $course_id, $completed);
+
+        return !$is_completed; // Returns true if now completed, false if now uncompleted
+    }
 }

@@ -30,6 +30,20 @@ body.smlms-focus-canvas-body #smlms-focus-app.has-admin-bar {
     margin-top: 32px !important;
 }
 
+/* Suppress Jetpack / 3rd Party Injected Widgets */
+body.smlms-focus-canvas-body #jp-relatedposts,
+body.smlms-focus-canvas-body .jp-relatedposts,
+body.smlms-focus-canvas-body .sharedaddy,
+body.smlms-focus-canvas-body .sd-sharing-enabled,
+body.smlms-focus-canvas-body #highlighter--hover-tools {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+}
+
 /* --- Top Navigation Header --- */
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-topbar {
     height: 60px !important;
@@ -79,13 +93,16 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-topbar-brand {
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     display: inline-block !important;
-    max-width: 220px !important;
+    max-width: 300px !important;
 }
 
+/* Centered Header Progress Bar Controls */
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-topbar-center {
     display: flex !important;
     align-items: center !important;
-    gap: 16px !important;
+    justify-content: center !important;
+    gap: 20px !important;
+    flex: 1 !important;
 }
 
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-progress-widget {
@@ -94,11 +111,11 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-progress-widget {
     gap: 10px !important;
     font-size: 12px !important;
     font-weight: 600 !important;
-    color: #64748b !important;
+    color: #00a2e8 !important;
 }
 
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-progress-track {
-    width: 130px !important;
+    width: 180px !important;
     height: 8px !important;
     background: #e2e8f0 !important;
     border-radius: 4px !important;
@@ -107,19 +124,41 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-progress-track {
 
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-progress-fill {
     height: 100% !important;
-    background: #00a2e8 !important;
+    background-color: #5d0059 !important;
     border-radius: 4px !important;
+    transition: width 0.3s ease !important;
 }
 
-body.smlms-focus-canvas-body #smlms-focus-app .smlms-btn-header-complete {
+/* Header Interactive Mark Complete Toggle Button */
+body.smlms-focus-canvas-body #smlms-focus-app .smlms-btn-mark-complete-toggle {
     background: #00a2e8 !important;
     color: #ffffff !important;
     border: none !important;
-    padding: 7px 18px !important;
+    padding: 8px 20px !important;
     border-radius: 20px !important;
     font-size: 13px !important;
     font-weight: 600 !important;
     cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    transition: background 0.2s ease, transform 0.1s ease !important;
+}
+
+body.smlms-focus-canvas-body #smlms-focus-app .smlms-btn-mark-complete-toggle:hover {
+    background: #0082ba !important;
+}
+
+body.smlms-focus-canvas-body #smlms-focus-app .smlms-btn-mark-complete-toggle.completed {
+    background: #5d0059 !important;
+    color: #ffffff !important;
+}
+
+body.smlms-focus-canvas-body #smlms-focus-app .smlms-btn-mark-complete-toggle .dashicons {
+    font-size: 16px !important;
+    width: 16px !important;
+    height: 16px !important;
+    line-height: 16px !important;
 }
 
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-topbar-right {
@@ -131,14 +170,6 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-topbar-right {
     flex-shrink: 0 !important;
 }
 
-body.smlms-focus-canvas-body #smlms-focus-app .smlms-topbar-next-link,
-body.smlms-focus-canvas-body #smlms-focus-app .smlms-topbar-next-link:visited {
-    color: #00a2e8 !important;
-    font-weight: 600 !important;
-    text-decoration: none !important;
-    font-size: 13px !important;
-}
-
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-user-avatar {
     width: 32px !important;
     height: 32px !important;
@@ -146,23 +177,9 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-user-avatar {
     object-fit: cover !important;
 }
 
-/* Mobile Sub-Navigation Row */
+/* Mobile Sub-Navigation Bar Removed Completely */
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-mobile-subnav {
     display: none !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    background: #ffffff !important;
-    border-bottom: 1px solid #e2e8f0 !important;
-    padding: 10px 16px !important;
-    width: 100% !important;
-}
-
-body.smlms-focus-canvas-body #smlms-focus-app .smlms-mobile-subnav-link,
-body.smlms-focus-canvas-body #smlms-focus-app .smlms-mobile-subnav-link:visited {
-    color: #00a2e8 !important;
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    text-decoration: none !important;
 }
 
 /* --- Focus Mode Stage Split --- */
@@ -189,7 +206,6 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-sidebar {
     z-index: 10 !important;
 }
 
-/* When collapsed, keep opacity:1 so the 1px black border line stays visible on screen edge */
 body.smlms-focus-canvas-body #smlms-focus-app.sidebar-collapsed .smlms-focus-sidebar {
     margin-left: -319px !important;
     opacity: 1 !important;
@@ -215,10 +231,6 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-header-title-wrap:v
     flex: 1 !important;
     color: #ffffff !important;
     text-decoration: none !important;
-}
-
-body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-header-title-wrap:hover .smlms-sidebar-course-name {
-    text-decoration: underline !important;
 }
 
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-header-icon {
@@ -334,7 +346,7 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-row-right {
     gap: 8px !important;
 }
 
-/* Status Circle Indicator */
+/* Status Circle Indicator - Reverted Default State */
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-status-circle {
     width: 16px !important;
     height: 16px !important;
@@ -342,6 +354,7 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-status-circle {
     border-radius: 50% !important;
     display: inline-block !important;
     flex-shrink: 0 !important;
+    background-color: transparent !important;
 }
 
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-status-circle.active-circle {
@@ -420,7 +433,7 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-topic-sublist .smlm
 /* --- Main Stage Area --- */
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-main-stage {
     flex: 1 1 auto !important;
-    padding: 40px !important;
+    padding: 30px 40px !important;
     max-width: 960px !important;
     margin: 0 auto !important;
     width: 100% !important;
@@ -428,23 +441,31 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-main-stage {
 }
 
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-step-main-title {
-    font-size: 28px !important;
+    font-size: 26px !important;
     font-weight: 700 !important;
     color: #0f172a !important;
-    margin: 0 0 16px 0 !important;
+    margin: 0 0 12px 0 !important;
     word-wrap: break-word !important;
 }
 
-/* Breadcrumb Banner */
+/* Breadcrumb Banner & Status Pill */
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-breadcrumb-banner {
     background: #edf7fd !important;
     border-radius: 6px !important;
-    padding: 12px 18px !important;
+    padding: 10px 16px !important;
     font-size: 13px !important;
     font-weight: 600 !important;
     color: #00a2e8 !important;
-    margin-bottom: 24px !important;
+    margin-bottom: 12px !important;
     word-wrap: break-word !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+}
+
+body.smlms-focus-canvas-body #smlms-focus-app .smlms-breadcrumb-links {
+    flex: 1 !important;
 }
 
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-breadcrumb-banner a,
@@ -457,12 +478,41 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-breadcrumb-banner a:h
     text-decoration: underline !important;
 }
 
+body.smlms-focus-canvas-body #smlms-focus-app .smlms-status-pill {
+    background-color: #00a2e8 !important;
+    color: #ffffff !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 3px 10px !important;
+    border-radius: 12px !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+body.smlms-focus-canvas-body #smlms-focus-app .smlms-status-pill.completed {
+    background-color: #5d0059 !important;
+}
+
+/* Body Content Block */
+body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-body-content {
+    margin-bottom: 12px !important;
+}
+
+body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-body-content p {
+    margin: 0 0 10px 0 !important;
+}
+
+body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-body-content p:last-child {
+    margin-bottom: 0 !important;
+}
+
 /* Dedicated Child Topics Card Box */
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-lesson-topics-card {
     background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
     border-radius: 8px !important;
-    margin: 24px 0 !important;
+    margin: 12px 0 20px 0 !important;
     overflow: hidden !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
 }
@@ -474,7 +524,7 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-lesson-topics-group {
 }
 
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-lesson-topic-row {
-    padding: 16px 20px !important;
+    padding: 14px 18px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
@@ -489,7 +539,7 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-lesson-topic-row:last-child
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-lesson-topic-left {
     display: flex !important;
     align-items: center !important;
-    gap: 14px !important;
+    gap: 12px !important;
 }
 
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-topic-play-icon {
@@ -538,13 +588,13 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-tabs-nav {
     display: flex !important;
     gap: 12px !important;
     border-bottom: 1px solid #e2e8f0 !important;
-    margin-bottom: 24px !important;
+    margin-bottom: 16px !important;
 }
 
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-tab-link {
     background: none !important;
     border: none !important;
-    padding: 10px 16px !important;
+    padding: 8px 14px !important;
     font-size: 14px !important;
     font-weight: 600 !important;
     color: #64748b !important;
@@ -569,7 +619,7 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-video-wrap {
     overflow: hidden !important;
     border-radius: 8px !important;
     background: #000000 !important;
-    margin-bottom: 24px !important;
+    margin-bottom: 16px !important;
 }
 
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-video-wrap iframe {
@@ -603,8 +653,8 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-footer-nav-row {
     align-items: center !important;
     justify-content: space-between !important;
     gap: 15px !important;
-    margin-top: 40px !important;
-    padding-top: 20px !important;
+    margin-top: 25px !important;
+    padding-top: 16px !important;
     border-top: 1px solid #e2e8f0 !important;
     width: 100% !important;
 }
@@ -654,26 +704,14 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-center-nav-link:visited {
     white-space: nowrap !important;
 }
 
-body.smlms-focus-canvas-body #smlms-focus-app .smlms-btn-mark-complete {
-    background-color: #5d0059 !important;
-    color: #ffffff !important;
-    border: none !important;
-    padding: 10px 22px !important;
-    border-radius: 30px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    white-space: nowrap !important;
-}
-
 /* Restricted Access Box */
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-access-restricted-box {
     background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
     border-radius: 8px !important;
-    padding: 40px !important;
+    padding: 30px !important;
     text-align: center !important;
-    margin-top: 20px !important;
+    margin-top: 15px !important;
 }
 
 body.smlms-focus-canvas-body #smlms-focus-app .smlms-access-restricted-box .dashicons {
@@ -712,13 +750,40 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-backdrop {
         display: none !important;
     }
 
-    body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-mobile-subnav {
-        display: flex !important;
+    body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-topbar {
+        padding: 0 10px !important;
+        gap: 6px !important;
     }
 
-    body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-topbar {
-        padding: 0 12px !important;
+    /* Progress Widget Displayed Compactly in Mobile Header */
+    body.smlms-focus-canvas-body #smlms-focus-app .smlms-topbar-center {
+        display: flex !important;
+        gap: 6px !important;
+        justify-content: center !important;
     }
+
+    body.smlms-focus-canvas-body #smlms-focus-app .smlms-progress-widget {
+        gap: 4px !important;
+        font-size: 10px !important;
+    }
+
+    body.smlms-focus-canvas-body #smlms-focus-app .smlms-progress-track {
+        width: 60px !important;
+        height: 6px !important;
+    }
+
+    body.smlms-focus-canvas-body #smlms-focus-app .smlms-progress-count {
+        display: none !important;
+    }
+
+    body.smlms-focus-canvas-body #smlms-focus-app .smlms-btn-mark-complete-toggle {
+        padding: 5px 10px !important;
+        font-size: 11px !important;
+    }
+
+    body.smlms-focus-canvas-body #smlms-focus-app .smlms-topbar-brand {
+	display : none !important;
+	}
 
     /* Fixed Off-Canvas Drawer Overlay */
     body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-sidebar {
@@ -772,7 +837,7 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-backdrop {
 
     body.smlms-focus-canvas-body #smlms-focus-app .smlms-step-main-title {
         font-size: 18px !important;
-        margin-bottom: 12px !important;
+        margin-bottom: 10px !important;
     }
 
     body.smlms-focus-canvas-body #smlms-focus-app .smlms-focus-breadcrumb-banner {
@@ -781,6 +846,7 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-backdrop {
         white-space: normal !important;
         word-break: break-word !important;
         line-height: 1.4 !important;
+        margin-bottom: 10px !important;
     }
 
     body.smlms-focus-canvas-body #smlms-focus-app .smlms-lesson-topic-row {
@@ -795,12 +861,11 @@ body.smlms-focus-canvas-body #smlms-focus-app .smlms-sidebar-backdrop {
         flex-direction: column !important;
         gap: 10px !important;
         padding-top: 15px !important;
-        margin-top: 25px !important;
+        margin-top: 20px !important;
     }
 
     body.smlms-focus-canvas-body #smlms-focus-app .smlms-footer-col,
-    body.smlms-focus-canvas-body #smlms-focus-app .smlms-btn-pill-cyan,
-    body.smlms-focus-canvas-body #smlms-focus-app .smlms-btn-mark-complete {
+    body.smlms-focus-canvas-body #smlms-focus-app .smlms-btn-pill-cyan {
         width: 100% !important;
         justify-content: center !important;
     }

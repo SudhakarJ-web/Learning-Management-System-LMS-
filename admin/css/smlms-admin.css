@@ -570,3 +570,106 @@ span.dashicons {
     padding: 4px 12px !important;
     font-weight: 700 !important;
 }
+
+/* --- LMS Setup Dashboard Stat Cards --- */
+.smlms-setup-dashboard-wrap {
+    margin-top: 20px;
+    padding-right: 20px;
+}
+
+.smlms-dashboard-header {
+    margin-bottom: 24px;
+}
+
+.smlms-dashboard-title {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin: 0 0 6px 0 !important;
+}
+
+.smlms-dashboard-subtitle {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0;
+}
+
+.smlms-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.smlms-stat-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 22px 24px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.smlms-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.smlms-stat-icon-badge {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.smlms-stat-icon-badge .dashicons {
+    font-size: 26px !important;
+    width: 26px !important;
+    height: 26px !important;
+    line-height: 26px !important;
+}
+
+.smlms-stat-icon-badge.bg-teal {
+    background-color: #ccfbf1;
+    color: #0d9488;
+}
+
+.smlms-stat-icon-badge.bg-orange {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.smlms-stat-icon-badge.bg-pink {
+    background-color: #fce7f3;
+    color: #db2777;
+}
+
+.smlms-stat-icon-badge.bg-purple {
+    background-color: #f3e8ff;
+    color: #9333ea;
+}
+
+.smlms-stat-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.smlms-stat-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.smlms-stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.1;
+}
