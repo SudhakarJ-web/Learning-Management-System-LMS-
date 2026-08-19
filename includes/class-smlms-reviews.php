@@ -1,6 +1,6 @@
 <?php
 /**
- * Sabin Mathew LMS - Course Reviews Handler
+ * Sabin Mathew LMS - Course Reviews & Helpful Votes Class
  */
 
 if (!defined('ABSPATH')) {
@@ -10,39 +10,55 @@ if (!defined('ABSPATH')) {
 class SMLMS_Reviews {
 
     public static function init() {
-        // Create Reviews Database Table on Activation / Init
-        add_action('init', [__CLASS__, 'create_reviews_table']);
-
-        // AJAX Handlers
+        add_action('init', [__CLASS__, 'create_tables']);
         add_action('wp_ajax_smlms_submit_review', [__CLASS__, 'ajax_submit_review']);
-        add_action('wp_ajax_smlms_vote_helpful', [__CLASS__, 'ajax_vote_helpful']);
+        add_action('wp_ajax_smlms_vote_review', [__CLASS__, 'ajax_vote_review']);
+        add_action('wp_ajax_nopriv_smlms_vote_review', [__CLASS__, 'ajax_vote_review_nopriv']);
     }
 
-    public static function create_reviews_table() {
+    /**
+     * Create reviews and votes database tables if not existing
+     */
+    public static function create_tables() {
         global $wpdb;
-        $table_name      = $wpdb->prefix . 'smlms_reviews';
         $charset_collate = $wpdb->get_charset_collate();
 
-        $sql = "CREATE TABLE IF NOT EXISTS {$table_name} (
+        $reviews_table = $wpdb->prefix . 'smlms_reviews';
+        $votes_table   = $wpdb->prefix . 'smlms_review_votes';
+
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+        $sql_reviews = "CREATE TABLE IF NOT EXISTS {$reviews_table} (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             course_id bigint(20) NOT NULL,
             user_id bigint(20) NOT NULL,
-            rating int(1) NOT NULL DEFAULT 5,
-            headline varchar(255) NOT NULL DEFAULT '',
+            rating tinyint(1) NOT NULL DEFAULT 5,
+            headline varchar(255) NOT NULL,
             review_text text NOT NULL,
             helpful_count int(11) NOT NULL DEFAULT 0,
-            created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            status varchar(20) NOT NULL DEFAULT 'approved',
+            created_at datetime NOT NULL,
             PRIMARY KEY  (id),
             KEY course_id (course_id),
             KEY user_id (user_id)
         ) {$charset_collate};";
 
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($sql);
+        $sql_votes = "CREATE TABLE IF NOT EXISTS {$votes_table} (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            review_id bigint(20) NOT NULL,
+            user_id bigint(20) NOT NULL,
+            vote_type varchar(20) NOT NULL,
+            created_at datetime NOT NULL,
+            PRIMARY KEY  (id),
+            UNIQUE KEY review_user (review_id, user_id)
+        ) {$charset_collate};";
+
+        dbDelta($sql_reviews);
+        dbDelta($sql_votes);
     }
 
     /**
-     * Check if a user has completed all course steps and is eligible to review
+     * Get user eligibility to submit a review
      */
     public static function is_user_eligible_to_review($user_id, $course_id) {
         $user_id   = intval($user_id);
@@ -52,115 +68,101 @@ class SMLMS_Reviews {
             return false;
         }
 
-        // Administrators can always test and write reviews
         if (current_user_can('manage_options')) {
             return true;
         }
 
-        // Must be enrolled in the course
-        if (!SMLMS_DB::is_user_enrolled($user_id, $course_id)) {
-            return false;
-        }
-
-        // Calculate total valid course steps
-        $hierarchy        = SMLMS_DB::get_course_hierarchy($course_id, $user_id);
-        $valid_step_ids   = [];
-        $total_steps      = 0;
-
-        if (!empty($hierarchy)) {
-            foreach ($hierarchy as $l_item) {
-                $l_id    = $l_item['lesson_id'];
-                $l_video = get_post_meta($l_id, '_smlms_video_id', true) ?: get_post_meta($l_id, '_smlms_media_embed', true);
-
-                if (!empty(trim((string)$l_video))) {
-                    $total_steps++;
-                    $valid_step_ids[] = $l_id;
-                }
-
-                if (!empty($l_item['topics'])) {
-                    foreach ($l_item['topics'] as $t_item) {
-                        $total_steps++;
-                        $valid_step_ids[] = $t_item['id'];
-                    }
-                }
-            }
-        }
-
-        if ($total_steps === 0) {
-            return false;
-        }
-
-        // Verify completed steps count
-        $completed_ids   = SMLMS_DB::get_user_completed_steps($user_id, $course_id);
-        $completed_count = 0;
-
-        foreach ($valid_step_ids as $v_id) {
-            if (in_array($v_id, $completed_ids)) {
-                $completed_count++;
-            }
-        }
-
-        return ($completed_count >= $total_steps);
+        return SMLMS_DB::is_user_enrolled($user_id, $course_id);
     }
 
     /**
-     * Get Course Rating Summary (Average rating, total count, star percentage breakdown)
+     * Get aggregate rating summary for a course
      */
     public static function get_rating_summary($course_id) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'smlms_reviews';
-        $course_id  = intval($course_id);
 
-        $results = $wpdb->get_results($wpdb->prepare(
-            "SELECT rating, COUNT(*) as count FROM {$table_name} WHERE course_id = %d GROUP BY rating",
-            $course_id
+        $rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT rating FROM {$table_name} WHERE course_id = %d AND status = 'approved'",
+            intval($course_id)
         ));
 
-        $total_reviews = 0;
-        $sum_rating    = 0;
-        $star_counts   = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
-
-        foreach ($results as $row) {
-            $r = intval($row->rating);
-            $c = intval($row->count);
-            if (isset($star_counts[$r])) {
-                $star_counts[$r] = $c;
-            }
-            $total_reviews += $c;
-            $sum_rating    += ($r * $c);
+        $total_count = count($rows);
+        if ($total_count === 0) {
+            return [
+                'avg_rating'  => 0,
+                'total_count' => 0,
+                'breakdown'   => [5=>0, 4=>0, 3=>0, 2=>0, 1=>0]
+            ];
         }
 
-        $avg_rating = ($total_reviews > 0) ? round($sum_rating / $total_reviews, 1) : 0;
+        $sum = 0;
+        $counts = [5=>0, 4=>0, 3=>0, 2=>0, 1=>0];
 
-        $star_percentages = [];
-        foreach ($star_counts as $star => $count) {
-            $star_percentages[$star] = ($total_reviews > 0) ? round(($count / $total_reviews) * 100) : 0;
+        foreach ($rows as $r) {
+            $val = intval($r->rating);
+            $sum += $val;
+            if (isset($counts[$val])) {
+                $counts[$val]++;
+            }
+        }
+
+        $avg_rating = round($sum / $total_count, 1);
+        $breakdown = [];
+
+        foreach ($counts as $star => $cnt) {
+            $breakdown[$star] = round(($cnt / $total_count) * 100);
         }
 
         return [
             'avg_rating'  => $avg_rating,
-            'total_count' => $total_reviews,
-            'breakdown'   => $star_percentages,
-            'star_counts' => $star_counts
+            'total_count' => $total_count,
+            'breakdown'   => $breakdown
         ];
     }
 
     /**
-     * Fetch Reviews for a Course
+     * Get published reviews list for a course
      */
-    public static function get_course_reviews($course_id, $limit = 50) {
+    public static function get_course_reviews($course_id) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'smlms_reviews';
-        
+
         return $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM {$table_name} WHERE course_id = %d ORDER BY created_at DESC LIMIT %d",
-            intval($course_id),
-            intval($limit)
+            "SELECT * FROM {$table_name} WHERE course_id = %d AND status = 'approved' ORDER BY created_at DESC",
+            intval($course_id)
         ));
     }
 
     /**
-     * AJAX Review Submission Handler
+     * Fetch user's votes for all reviews in a course
+     */
+    public static function get_user_course_review_votes($user_id, $course_id) {
+        global $wpdb;
+        $votes_table   = $wpdb->prefix . 'smlms_review_votes';
+        $reviews_table = $wpdb->prefix . 'smlms_reviews';
+
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT v.review_id, v.vote_type 
+             FROM {$votes_table} v 
+             INNER JOIN {$reviews_table} r ON v.review_id = r.id 
+             WHERE v.user_id = %d AND r.course_id = %d",
+            intval($user_id),
+            intval($course_id)
+        ));
+
+        $votes_map = [];
+        if (!empty($results)) {
+            foreach ($results as $row) {
+                $votes_map[$row->review_id] = $row->vote_type;
+            }
+        }
+
+        return $votes_map;
+    }
+
+    /**
+     * AJAX Submit New Review
      */
     public static function ajax_submit_review() {
         check_ajax_referer('smlms_review_nonce', '_wpnonce');
@@ -169,87 +171,132 @@ class SMLMS_Reviews {
         $course_id = intval($_POST['course_id'] ?? 0);
         $rating    = intval($_POST['rating'] ?? 5);
         $headline  = sanitize_text_field($_POST['headline'] ?? '');
-        $review    = sanitize_textarea_field($_POST['review_text'] ?? '');
+        $review_txt= sanitize_textarea_field($_POST['review_text'] ?? '');
 
-        if (!$user_id || !$course_id) {
-            wp_send_json_error(['message' => 'Invalid parameters. Please log in.']);
+        if (!$user_id) {
+            wp_send_json_error(['message' => 'You must be logged in to post a review.']);
         }
 
         if (!self::is_user_eligible_to_review($user_id, $course_id)) {
-            wp_send_json_error(['message' => 'You have not completed lessons required to submit a review for this course.']);
+            wp_send_json_error(['message' => 'You are not eligible to review this course.']);
         }
 
-        if ($rating < 1 || $rating > 5) {
-            wp_send_json_error(['message' => 'Please select a valid rating between 1 and 5 stars.']);
-        }
-
-        if (empty($review)) {
-            wp_send_json_error(['message' => 'Please enter your review comments.']);
+        if (empty($headline) || empty($review_txt)) {
+            wp_send_json_error(['message' => 'Please fill in all required fields.']);
         }
 
         global $wpdb;
         $table_name = $wpdb->prefix . 'smlms_reviews';
 
-        // Check if user already reviewed
-        $existing_id = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM {$table_name} WHERE course_id = %d AND user_id = %d",
-            $course_id,
-            $user_id
-        ));
+        $inserted = $wpdb->insert(
+            $table_name,
+            [
+                'course_id'     => $course_id,
+                'user_id'       => $user_id,
+                'rating'        => max(1, min(5, $rating)),
+                'headline'      => $headline,
+                'review_text'   => $review_txt,
+                'helpful_count' => 0,
+                'status'        => 'approved',
+                'created_at'    => current_time('mysql')
+            ],
+            ['%d', '%d', '%d', '%s', '%s', '%d', '%s', '%s']
+        );
 
-        if ($existing_id) {
-            $wpdb->update(
-                $table_name,
-                [
-                    'rating'      => $rating,
-                    'headline'    => $headline,
-                    'review_text' => $review,
-                    'created_at'  => current_time('mysql'),
-                ],
-                ['id' => $existing_id],
-                ['%d', '%s', '%s', '%s'],
-                ['%d']
-            );
+        if ($inserted) {
+            wp_send_json_success(['message' => 'Thank you! Your review has been submitted.']);
         } else {
-            $wpdb->insert(
-                $table_name,
-                [
-                    'course_id'   => $course_id,
-                    'user_id'     => $user_id,
-                    'rating'      => $rating,
-                    'headline'    => $headline,
-                    'review_text' => $review,
-                    'created_at'  => current_time('mysql'),
-                ],
-                ['%d', '%d', '%d', '%s', '%s', '%s']
-            );
+            wp_send_json_error(['message' => 'Failed to submit review. Please try again.']);
         }
-
-        wp_send_json_success(['message' => 'Thank you! Your review has been submitted successfully.']);
     }
 
     /**
-     * AJAX Vote Helpful Handler
+     * AJAX Vote Review (Helpful / Not Helpful)
      */
-    public static function ajax_vote_helpful() {
+    public static function ajax_vote_review() {
         check_ajax_referer('smlms_review_nonce', '_wpnonce');
 
+        $user_id   = get_current_user_id();
         $review_id = intval($_POST['review_id'] ?? 0);
-        if (!$review_id) {
-            wp_send_json_error(['message' => 'Invalid review ID']);
+        $vote_type = sanitize_text_field($_POST['vote_type'] ?? '');
+
+        if (!$user_id) {
+            wp_send_json_error(['message' => 'Please log in to vote on reviews.']);
+        }
+
+        if (!$review_id || !in_array($vote_type, ['helpful', 'not_helpful'])) {
+            wp_send_json_error(['message' => 'Invalid vote data.']);
         }
 
         global $wpdb;
-        $table_name = $wpdb->prefix . 'smlms_reviews';
+        $votes_table   = $wpdb->prefix . 'smlms_review_votes';
+        $reviews_table = $wpdb->prefix . 'smlms_reviews';
 
-        $wpdb->query($wpdb->prepare(
-            "UPDATE {$table_name} SET helpful_count = helpful_count + 1 WHERE id = %d",
-            $review_id
+        // Check if existing vote exists for this user and review
+        $existing = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$votes_table} WHERE review_id = %d AND user_id = %d",
+            $review_id,
+            $user_id
         ));
 
-        $new_count = $wpdb->get_var($wpdb->prepare("SELECT helpful_count FROM {$table_name} WHERE id = %d", $review_id));
+        $new_user_vote = '';
 
-        wp_send_json_success(['new_count' => intval($new_count)]);
+        if ($existing) {
+            if ($existing->vote_type === $vote_type) {
+                // Clicking the same option again removes the vote (toggles off)
+                $wpdb->delete($votes_table, ['id' => $existing->id], ['%d']);
+                $new_user_vote = '';
+            } else {
+                // Switching vote from Helpful to Not Helpful or vice-versa
+                $wpdb->update(
+                    $votes_table,
+                    ['vote_type' => $vote_type, 'created_at' => current_time('mysql')],
+                    ['id' => $existing->id],
+                    ['%s', '%s'],
+                    ['%d']
+                );
+                $new_user_vote = $vote_type;
+            }
+        } else {
+            // New vote insertion
+            $wpdb->insert(
+                $votes_table,
+                [
+                    'review_id'  => $review_id,
+                    'user_id'    => $user_id,
+                    'vote_type'  => $vote_type,
+                    'created_at' => current_time('mysql')
+                ],
+                ['%d', '%d', '%s', '%s']
+            );
+            $new_user_vote = $vote_type;
+        }
+
+        // Recalculate Helpful count for the review
+        $helpful_count = intval($wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$votes_table} WHERE review_id = %d AND vote_type = 'helpful'",
+            $review_id
+        )));
+
+        // Update review record
+        $wpdb->update(
+            $reviews_table,
+            ['helpful_count' => $helpful_count],
+            ['id' => $review_id],
+            ['%d'],
+            ['%d']
+        );
+
+        wp_send_json_success([
+            'review_id'     => $review_id,
+            'helpful_count' => $helpful_count,
+            'user_vote'     => $new_user_vote,
+            'message'       => 'Feedback saved.'
+        ]);
+    }
+
+    public static function ajax_vote_review_nopriv() {
+        wp_send_json_error(['message' => 'Please log in to vote on reviews.']);
     }
 }
 

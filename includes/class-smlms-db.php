@@ -27,17 +27,24 @@ class SMLMS_DB {
                 $lesson_id = intval($l_node['id'] ?? 0);
                 if (!$lesson_id || get_post_status($lesson_id) !== 'publish') continue;
 
+                $lesson_duration     = trim((string) get_post_meta($lesson_id, '_smlms_duration', true));
+                $lesson_content_type = trim((string) get_post_meta($lesson_id, '_smlms_content_type', true));
+
                 $topics = [];
                 if (!empty($l_node['topics']) && is_array($l_node['topics'])) {
                     foreach ($l_node['topics'] as $t_node) {
                         $topic_id = intval($t_node['id'] ?? 0);
                         if (!$topic_id || get_post_status($topic_id) !== 'publish') continue;
 
+                        $topic_duration     = trim((string) get_post_meta($topic_id, '_smlms_duration', true));
+                        $topic_content_type = trim((string) get_post_meta($topic_id, '_smlms_content_type', true));
+
                         $topics[] = [
-                            'id'        => $topic_id,
-                            'title'     => get_the_title($topic_id),
-                            'permalink' => get_permalink($topic_id),
-                            'duration'  => get_post_meta($topic_id, '_smlms_duration', true) ?: '5.00',
+                            'id'           => $topic_id,
+                            'title'        => get_the_title($topic_id),
+                            'permalink'    => get_permalink($topic_id),
+                            'duration'     => $topic_duration,
+                            'content_type' => $topic_content_type,
                         ];
                     }
                 }
@@ -46,7 +53,8 @@ class SMLMS_DB {
                     'lesson_id'    => $lesson_id,
                     'lesson_title' => get_the_title($lesson_id),
                     'permalink'    => get_permalink($lesson_id),
-                    'duration'     => get_post_meta($lesson_id, '_smlms_duration', true) ?: '5.00',
+                    'duration'     => $lesson_duration,
+                    'content_type' => $lesson_content_type,
                     'topics'       => $topics,
                 ];
             }
@@ -65,15 +73,22 @@ class SMLMS_DB {
         ]);
 
         foreach ($lessons as $lesson) {
+            $lesson_duration     = trim((string) get_post_meta($lesson->ID, '_smlms_duration', true));
+            $lesson_content_type = trim((string) get_post_meta($lesson->ID, '_smlms_content_type', true));
+
             $child_topics = self::get_lesson_topics($lesson->ID);
             $topics_data  = [];
 
             foreach ($child_topics as $topic) {
+                $topic_duration     = trim((string) get_post_meta($topic->ID, '_smlms_duration', true));
+                $topic_content_type = trim((string) get_post_meta($topic->ID, '_smlms_content_type', true));
+
                 $topics_data[] = [
-                    'id'        => $topic->ID,
-                    'title'     => $topic->post_title,
-                    'permalink' => get_permalink($topic->ID),
-                    'duration'  => get_post_meta($topic->ID, '_smlms_duration', true) ?: '5.00',
+                    'id'           => $topic->ID,
+                    'title'        => $topic->post_title,
+                    'permalink'    => get_permalink($topic->ID),
+                    'duration'     => $topic_duration,
+                    'content_type' => $topic_content_type,
                 ];
             }
 
@@ -81,7 +96,8 @@ class SMLMS_DB {
                 'lesson_id'    => $lesson->ID,
                 'lesson_title' => $lesson->post_title,
                 'permalink'    => get_permalink($lesson->ID),
-                'duration'     => get_post_meta($lesson->ID, '_smlms_duration', true) ?: '5.00',
+                'duration'     => $lesson_duration,
+                'content_type' => $lesson_content_type,
                 'topics'       => $topics_data,
             ];
         }
@@ -235,10 +251,8 @@ class SMLMS_DB {
         global $wpdb;
         $table_name = $wpdb->prefix . 'smlms_enrollments';
 
-        // Unique enrolled users in DB
         $db_count = intval($wpdb->get_var("SELECT COUNT(DISTINCT user_id) FROM {$table_name}"));
 
-        // Sum manual offset across published courses if configured
         $manual_offsets = $wpdb->get_var("
             SELECT SUM(CAST(meta_value AS UNSIGNED)) 
             FROM {$wpdb->postmeta} 
@@ -271,8 +285,8 @@ class SMLMS_DB {
         $counts = wp_count_posts('smlms_topic');
         return intval($counts->publish ?? 0);
     }
-	
-	/**
+
+    /**
      * Get user completed step IDs for a specific course
      */
     public static function get_user_completed_steps($user_id, $course_id) {
@@ -306,6 +320,7 @@ class SMLMS_DB {
         $completed = array_values(array_unique($completed));
         update_user_meta($user_id, '_smlms_completed_steps_' . $course_id, $completed);
 
-        return !$is_completed; // Returns true if now completed, false if now uncompleted
+        return !$is_completed;
     }
+
 }

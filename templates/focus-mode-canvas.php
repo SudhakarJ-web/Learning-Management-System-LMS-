@@ -363,30 +363,34 @@ $post_body_raw = trim(get_post_field('post_content', $post_id));
                             <?php if ($is_lesson && !empty($lesson_topics)): ?>
                                 <div class="smlms-lesson-topics-card">
                                     <ul class="smlms-lesson-topics-group">
-                                        <?php foreach ($lesson_topics as $t_index => $t_obj): 
-                                            $t_id       = $t_obj->ID;
-                                            $t_title    = $t_obj->post_title;
-                                            $t_url      = get_permalink($t_id);
-                                            $t_duration = get_post_meta($t_id, '_smlms_duration', true) ?: '5.00';
-                                            $t_type     = strtolower(trim((string) get_post_meta($t_id, '_smlms_content_type', true)));
-                                            $t_icon     = ($t_type === 'presentation') ? 'dashicons-media-interactive' : 'dashicons-controls-play';
-                                        ?>
-                                            <li class="smlms-lesson-topic-row">
-                                                <div class="smlms-lesson-topic-left">
-                                                    <span class="smlms-topic-play-icon" title="<?php echo esc_attr(ucfirst($t_type)); ?>">
-                                                        <span class="dashicons <?php echo esc_attr($t_icon); ?>"></span>
-                                                    </span>
-                                                    <a href="<?php echo esc_url($t_url); ?>" class="smlms-lesson-topic-link">
-                                                        <?php echo $parent_l_number . '.' . ($t_index + 1) . ' ' . esc_html($t_title); ?>
-                                                    </a>
-                                                </div>
+                                        <!-- Inside Child Topics Loop in templates/focus-mode-canvas.php -->
+										<?php foreach ($lesson_topics as $t_index => $t_obj): 
+											$t_id       = $t_obj->ID;
+											$t_title    = $t_obj->post_title;
+											$t_url      = get_permalink($t_id);
+											$t_duration = trim((string)get_post_meta($t_id, '_smlms_duration', true));
+											$t_type     = strtolower(trim((string)get_post_meta($t_id, '_smlms_content_type', true)));
+											$t_icon     = ($t_type === 'presentation') ? 'dashicons-media-interactive' : 'dashicons-controls-play';
+										?>
+											<li class="smlms-lesson-topic-row">
+												<div class="smlms-lesson-topic-left">
+													<span class="smlms-topic-play-icon" title="<?php echo esc_attr(ucfirst($t_type ?: 'Video')); ?>">
+														<span class="dashicons <?php echo esc_attr($t_icon); ?>"></span>
+													</span>
+													<a href="<?php echo esc_url($t_url); ?>" class="smlms-lesson-topic-link">
+														<?php echo $parent_l_number . '.' . ($t_index + 1) . ' ' . esc_html($t_title); ?>
+													</a>
+												</div>
 
-                                                <div class="smlms-lesson-topic-right">
-                                                    <span class="smlms-topic-duration"><?php echo esc_html($t_duration); ?></span>
-                                                    <span class="smlms-status-circle <?php echo in_array($t_id, $user_completed_ids) ? 'active-circle' : ''; ?>"></span>
-                                                </div>
-                                            </li>
-                                        <?php endforeach; ?>
+												<div class="smlms-lesson-topic-right">
+													<!-- Duration rendered ONLY if non-empty -->
+													<?php if (!empty($t_duration)): ?>
+														<span class="smlms-topic-duration"><?php echo esc_html($t_duration); ?></span>
+													<?php endif; ?>
+													<span class="smlms-status-circle <?php echo in_array($t_id, $user_completed_ids) ? 'active-circle' : ''; ?>"></span>
+												</div>
+											</li>
+										<?php endforeach; ?>
                                     </ul>
                                 </div>
                             <?php endif; ?>

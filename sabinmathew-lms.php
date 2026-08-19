@@ -39,6 +39,7 @@ if (is_admin()) {
     require_once SMLMS_PLUGIN_DIR . 'includes/admin/class-smlms-meta-saver.php';
     require_once SMLMS_PLUGIN_DIR . 'includes/admin/class-smlms-user-profile.php';
     require_once SMLMS_PLUGIN_DIR . 'includes/admin/class-user-course-access.php';
+    require_once SMLMS_PLUGIN_DIR . 'includes/admin/class-smlms-admin-reviews.php';
 
     // Meta Box Renderers
     require_once SMLMS_PLUGIN_DIR . 'includes/admin/meta-boxes/class-meta-course-builder.php';
