@@ -3,7 +3,7 @@
  * Plugin Name: Sabin Mathew LMS
  * Plugin URI:  https://sabinmathew.com/
  * Description: Custom Lightweight LMS for Sabin Mathew Engineering Courses.
- * Version:     1.1.0
+ * Version:     1.1.2
  * Author:      Sabin Mathew
  * Text Domain: sabinmathew-lms
  */

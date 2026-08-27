@@ -62,15 +62,17 @@ class SMLMS_Admin_Menu {
             'edit.php?post_type=smlms_topic'
         );
 
-        // 6. Submenu: Orders / Enrollments
-        add_submenu_page(
-            'smlms_main_menu',
-            'LMS Orders',
-            'Orders',
-            'manage_options',
-            'smlms_orders',
-            [__CLASS__, 'render_orders_page']
-        );
+        // 6. Submenu: Course Reviews List
+        if (class_exists('SMLMS_Admin_Reviews')) {
+            add_submenu_page(
+                'smlms_main_menu',
+                'Course Reviews',
+                'Reviews',
+                'manage_options',
+                'smlms-reviews',
+                ['SMLMS_Admin_Reviews', 'render_reviews_page']
+            );
+        }
 
         // 7. Submenu: Global Settings
         add_submenu_page(
@@ -98,29 +100,7 @@ class SMLMS_Admin_Menu {
         } else {
             echo '<div class="wrap"><h2>LMS Setup</h2><p>Setup template file not found at: <code>' . esc_html($setup_view_file) . '</code></p></div>';
         }
-    }
-
-    /**
-     * Render Orders Page Callback
-     */
-    public static function render_orders_page() {
-        if (!current_user_can('manage_options')) {
-            return;
-        }
-
-        $orders_file = SMLMS_PLUGIN_DIR . 'includes/admin/views/orders-page.php';
-
-        if (file_exists($orders_file)) {
-            include $orders_file;
-        } else {
-            ?>
-            <div class="wrap">
-                <h1>LMS Orders & Enrollments</h1>
-                <p>Manage student course transactions and manual access records here.</p>
-            </div>
-            <?php
-        }
-    }
+    }   
 
     /**
      * Render Settings Page Callback

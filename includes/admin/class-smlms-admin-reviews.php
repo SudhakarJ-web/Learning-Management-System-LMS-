@@ -14,12 +14,20 @@ class SMLMS_Admin_Reviews {
         add_action('admin_init', [__CLASS__, 'handle_admin_actions']);
     }
 
-    /**
-     * Register Reviews Submenu under Sabin Mathew LMS
-     */
     public static function register_submenu_page() {
+        $parent_slug = 'smlms_main_menu';
+
+        global $submenu;
+        if (isset($submenu[$parent_slug])) {
+            foreach ($submenu[$parent_slug] as $item) {
+                if ($item[2] === 'smlms-reviews') {
+                    return;
+                }
+            }
+        }
+
         add_submenu_page(
-            'smlms-setup', // Parent menu slug (e.g. 'smlms-setup' or 'sabin-mathew-lms')
+            $parent_slug,
             'Course Reviews',
             'Reviews',
             'manage_options',
@@ -28,9 +36,6 @@ class SMLMS_Admin_Reviews {
         );
     }
 
-    /**
-     * Handle Single & Bulk Admin Actions (Approve, Unapprove, Delete)
-     */
     public static function handle_admin_actions() {
         if (!isset($_GET['page']) || $_GET['page'] !== 'smlms-reviews') {
             return;
@@ -44,7 +49,6 @@ class SMLMS_Admin_Reviews {
         $table_reviews = $wpdb->prefix . 'smlms_reviews';
         $table_votes   = $wpdb->prefix . 'smlms_review_votes';
 
-        // 1. Single Item Actions
         if (isset($_GET['action_type']) && isset($_GET['review_id'])) {
             $action_type = sanitize_text_field($_GET['action_type']);
             $review_id   = intval($_GET['review_id']);
@@ -67,7 +71,6 @@ class SMLMS_Admin_Reviews {
             }
         }
 
-        // 2. Bulk Actions
         if ((isset($_GET['bulk_action']) && $_GET['bulk_action'] !== '-1') || (isset($_GET['bulk_action2']) && $_GET['bulk_action2'] !== '-1')) {
             $bulk_action = ($_GET['bulk_action'] !== '-1') ? sanitize_text_field($_GET['bulk_action']) : sanitize_text_field($_GET['bulk_action2']);
             $review_ids  = isset($_GET['review']) ? array_map('intval', (array)$_GET['review']) : [];
@@ -96,28 +99,25 @@ class SMLMS_Admin_Reviews {
         }
     }
 
-    /**
-     * Render Native WP List Table Page
-     */
     public static function render_reviews_page() {
         global $wpdb;
         $table = $wpdb->prefix . 'smlms_reviews';
 
-        // URL Parameters
+        // Auto-heal empty or legacy post_status values to 'approved'
+        $wpdb->query("UPDATE {$table} SET status = 'approved' WHERE status IS NULL OR status = '' OR status = 'publish'");
+
         $status_filter = isset($_GET['status_filter']) ? sanitize_text_field($_GET['status_filter']) : 'all';
         $course_filter = isset($_GET['course_filter']) ? intval($_GET['course_filter']) : 0;
         $star_filter   = isset($_GET['star_filter']) ? intval($_GET['star_filter']) : 0;
         $search_term   = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
 
-        // Status Counts
         $total_all      = intval($wpdb->get_var("SELECT COUNT(*) FROM {$table}"));
-        $total_approved = intval($wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE status = 'approved'"));
+        $total_approved = intval($wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE status IN ('approved', 'publish')"));
         $total_pending  = intval($wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE status = 'pending'"));
 
-        // Build Query Conditions
         $where = [];
         if ($status_filter === 'approved') {
-            $where[] = "status = 'approved'";
+            $where[] = "status IN ('approved', 'publish')";
         } elseif ($status_filter === 'pending') {
             $where[] = "status = 'pending'";
         }
@@ -138,7 +138,6 @@ class SMLMS_Admin_Reviews {
         $where_sql = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
         $reviews   = $wpdb->get_results("SELECT * FROM {$table} {$where_sql} ORDER BY created_at DESC");
 
-        // Fetch Courses for Dropdown Filter
         $courses = get_posts([
             'post_type'      => 'smlms_course',
             'posts_per_page' => -1,
@@ -169,7 +168,6 @@ class SMLMS_Admin_Reviews {
                 </div>
             <?php endif; ?>
 
-            <!-- Status Navigation Links (All | Published/Approved | Pending) -->
             <ul class="subsubsub">
                 <li class="all">
                     <a href="<?php echo esc_url(admin_url('admin.php?page=smlms-reviews')); ?>" class="<?php echo ($status_filter === 'all') ? 'current' : ''; ?>">
@@ -194,14 +192,12 @@ class SMLMS_Admin_Reviews {
                     <input type="hidden" name="status_filter" value="<?php echo esc_attr($status_filter); ?>">
                 <?php endif; ?>
 
-                <!-- Top Search Box -->
                 <p class="search-box">
                     <label class="screen-reader-text" for="smlms-review-search-input">Search Reviews:</label>
                     <input type="search" id="smlms-review-search-input" name="s" value="<?php echo esc_attr($search_term); ?>">
                     <input type="submit" id="search-submit" class="button" value="Search Reviews">
                 </p>
 
-                <!-- Bulk Actions & Dropdown Filters Bar -->
                 <div class="tablenav top">
                     <div class="alignleft actions bulkactions">
                         <?php wp_nonce_field('smlms_bulk_reviews_nonce'); ?>
@@ -215,7 +211,6 @@ class SMLMS_Admin_Reviews {
                     </div>
 
                     <div class="alignleft actions">
-                        <!-- Course Filter Dropdown -->
                         <select name="course_filter">
                             <option value="0">All courses</option>
                             <?php foreach ($courses as $c): ?>
@@ -225,7 +220,6 @@ class SMLMS_Admin_Reviews {
                             <?php endforeach; ?>
                         </select>
 
-                        <!-- Star Rating Filter Dropdown -->
                         <select name="star_filter">
                             <option value="0">All stars</option>
                             <option value="5" <?php selected($star_filter, 5); ?>>5 stars</option>
@@ -243,7 +237,6 @@ class SMLMS_Admin_Reviews {
                     </div>
                 </div>
 
-                <!-- Main Native WP List Table -->
                 <table class="wp-list-table widefat fixed striped table-view-list posts">
                     <thead>
                         <tr>
@@ -299,7 +292,6 @@ class SMLMS_Admin_Reviews {
                                         <input type="checkbox" name="review[]" value="<?php echo esc_attr($rev->id); ?>">
                                     </th>
 
-                                    <!-- Title & Row Actions -->
                                     <td class="title column-title has-row-actions column-primary page-title">
                                         <strong>
                                             <a class="row-title" href="<?php echo esc_url($course_link); ?>#reviews" target="_blank">
@@ -308,7 +300,7 @@ class SMLMS_Admin_Reviews {
                                         </strong>
                                         
                                         <div class="row-actions">
-                                            <?php if ($rev->status === 'approved'): ?>
+                                            <?php if ($rev->status === 'approved' || $rev->status === 'publish'): ?>
                                                 <span class="unapprove"><a href="<?php echo esc_url($unapprove_url); ?>">Unapprove</a> | </span>
                                             <?php else: ?>
                                                 <span class="approve"><a href="<?php echo esc_url($approve_url); ?>" style="color: #15803d; font-weight: 600;">Approve</a> | </span>
@@ -318,7 +310,6 @@ class SMLMS_Admin_Reviews {
                                         </div>
                                     </td>
 
-                                    <!-- Comments Count -->
                                     <td class="comments column-comments">
                                         <div class="post-com-count-wrapper">
                                             <span class="post-com-count post-com-count-no-comments">
@@ -327,21 +318,18 @@ class SMLMS_Admin_Reviews {
                                         </div>
                                     </td>
 
-                                    <!-- Helpful Votes Count -->
                                     <td class="ratings-count column-ratings-count">
                                         <span class="post-com-count" style="background-color: #f1f5f9; color: #475569;">
                                             <span class="comment-count-approved"><?php echo esc_html($rev->helpful_count); ?></span>
                                         </span>
                                     </td>
 
-                                    <!-- Course Name Link -->
                                     <td class="course column-course">
                                         <a href="<?php echo esc_url($course_link); ?>" target="_blank">
                                             <?php echo esc_html($course_title); ?>
                                         </a>
                                     </td>
 
-                                    <!-- Gold Stars Rating -->
                                     <td class="rating column-rating">
                                         <span style="color: #f59e0b; font-size: 15px; letter-spacing: 1px;">
                                             <?php 
@@ -352,12 +340,10 @@ class SMLMS_Admin_Reviews {
                                         </span>
                                     </td>
 
-                                    <!-- Author Name -->
                                     <td class="author column-author">
                                         <strong><?php echo esc_html($author_name); ?></strong>
                                     </td>
 
-                                    <!-- Date -->
                                     <td class="date column-date">
                                         Published<br>
                                         <abbr title="<?php echo esc_attr($rev->created_at); ?>">
@@ -385,7 +371,6 @@ class SMLMS_Admin_Reviews {
                     </tfoot>
                 </table>
 
-                <!-- Bottom Bulk Actions Bar -->
                 <div class="tablenav bottom">
                     <div class="alignleft actions bulkactions">
                         <select name="bulk_action2">
@@ -405,7 +390,6 @@ class SMLMS_Admin_Reviews {
 
         <script>
         jQuery(document).ready(function($) {
-            // Check All Checkboxes Toggle
             $('#cb-select-all-1, #cb-select-all-2').on('change', function() {
                 var checked = $(this).prop('checked');
                 $('input[name="review[]"]').prop('checked', checked);

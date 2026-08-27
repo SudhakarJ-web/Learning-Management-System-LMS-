@@ -93,7 +93,7 @@ body.smlms-single-course-body .smlms-breadcrumbs a:hover {
 body.smlms-single-course-body .smlms-course-title {
     color: #ffffff !important;
     font-size: 32px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     line-height: 1.25 !important;
     margin: 0 0 20px 0 !important;
     word-wrap: break-word !important;
@@ -123,7 +123,7 @@ body.smlms-single-course-body .smlms-meta-item {
     display: inline-flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    gap: 6px !important;
+    gap: 14px !important;
     white-space: nowrap !important;
     margin: 0 !important;
 }
@@ -262,7 +262,7 @@ body.smlms-single-course-body .smlms-card-actions {
 
 body.smlms-single-course-body .smlms-card-price-display {
     font-size: 32px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     color: #5d0059 !important;
     margin-bottom: 6px !important;
 }
@@ -387,7 +387,7 @@ body.smlms-single-course-body .smlms-tab-btn.active {
 
 body.smlms-single-course-body .smlms-course-body-container {
     max-width: 1200px !important;
-    margin: 40px auto !important;
+    margin: 20px auto !important;
     padding: 0 20px !important;
 }
 
@@ -417,7 +417,7 @@ body.smlms-single-course-body .smlms-curriculum-header-row {
 
 body.smlms-single-course-body .smlms-curriculum-title {
     font-size: 22px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     color: #0f172a !important;
     margin: 0 !important;
 }
@@ -522,7 +522,7 @@ body.smlms-single-course-body .smlms-badge-sample {
     background: #d0f0fd !important;
     color: #00a2e8 !important;
     font-size: 11px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     padding: 4px 10px !important;
     border-radius: 14px !important;
     display: inline-flex !important;
@@ -751,7 +751,7 @@ body.smlms-single-course-body .smlms-btn-purple,
 body.smlms-single-course-body .smlms-btn-purple:visited {
     background-color: #5d0059 !important;
     color: #ffffff !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     font-size: 13px !important;
     padding: 12px 28px !important;
     border-radius: 30px !important;
@@ -855,7 +855,7 @@ body.smlms-single-course-body .smlms-bar-percentage {
 
 body.smlms-single-course-body .smlms-reviews-list-title {
     font-size: 20px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     color: #0f172a !important;
     margin: 0 0 16px 0 !important;
 }
@@ -964,7 +964,7 @@ body.smlms-single-course-body .smlms-review-stars-row {
 
 body.smlms-single-course-body .smlms-review-headline-text {
     font-size: 15px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     color: #0f172a !important;
 }
 
@@ -1032,7 +1032,7 @@ body.smlms-single-course-body .smlms-write-review-section {
 
 body.smlms-single-course-body .smlms-write-review-title {
     font-size: 18px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     color: #0f172a !important;
     margin: 0 0 14px 0 !important;
 }
@@ -1164,7 +1164,7 @@ body.smlms-single-course-body .smlms-btn-purple,
 body.smlms-single-course-body .smlms-btn-purple:visited {
     background-color: #5d0059 !important;
     color: #ffffff !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     font-size: 13px !important;
     padding: 12px 28px !important;
     border-radius: 30px !important;
@@ -1268,7 +1268,7 @@ body.smlms-single-course-body .smlms-bar-percentage {
 
 body.smlms-single-course-body .smlms-reviews-list-title {
     font-size: 20px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     color: #0f172a !important;
     margin: 0 0 16px 0 !important;
 }
@@ -1377,7 +1377,7 @@ body.smlms-single-course-body .smlms-review-stars-row {
 
 body.smlms-single-course-body .smlms-review-headline-text {
     font-size: 15px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     color: #0f172a !important;
 }
 
@@ -1472,7 +1472,7 @@ body.smlms-single-course-body .smlms-write-review-section {
 
 body.smlms-single-course-body .smlms-write-review-title {
     font-size: 18px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     color: #0f172a !important;
     margin: 0 0 14px 0 !important;
 }
@@ -1512,6 +1512,99 @@ body.smlms-single-course-body .smlms-review-textarea {
     margin: 5px 0 !important;
 }
 
+/* Inline Comments Drawer & Items */
+body.smlms-single-course-body .smlms-review-comments-wrapper {
+    margin-top: 14px !important;
+    padding-top: 12px !important;
+    border-top: 1px solid #f1f5f9 !important;
+    background: #f8fafc !important;
+    border-radius: 8px !important;
+    padding: 16px !important;
+}
+
+body.smlms-single-course-body .smlms-comments-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    margin-bottom: 14px !important;
+}
+
+body.smlms-single-course-body .smlms-comment-item {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    background: #ffffff !important;
+    padding: 10px 14px !important;
+    border-radius: 6px !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+body.smlms-single-course-body .smlms-comment-avatar {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    flex-shrink: 0 !important;
+}
+
+body.smlms-single-course-body .smlms-comment-body {
+    flex: 1 !important;
+}
+
+body.smlms-single-course-body .smlms-comment-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 4px !important;
+}
+
+body.smlms-single-course-body .smlms-comment-header strong {
+    font-size: 13px !important;
+    color: #0f172a !important;
+}
+
+body.smlms-single-course-body .smlms-comment-date {
+    font-size: 11px !important;
+    color: #94a3b8 !important;
+}
+
+body.smlms-single-course-body .smlms-comment-body p {
+    font-size: 13px !important;
+    color: #334155 !important;
+    line-height: 1.4 !important;
+    margin: 0 !important;
+}
+
+body.smlms-single-course-body .smlms-comment-submission-form {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    align-items: flex-end !important;
+}
+
+body.smlms-single-course-body .smlms-comment-textarea {
+    width: 100% !important;
+    padding: 8px 12px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    outline: none !important;
+    resize: vertical !important;
+    background: #ffffff !important;
+}
+
+body.smlms-single-course-body .smlms-btn-small {
+    padding: 6px 16px !important;
+    font-size: 12px !important;
+    border-radius: 20px !important;
+}
+
+body.smlms-single-course-body .smlms-comment-login-note {
+    font-size: 12px !important;
+    color: #64748b !important;
+    margin: 0 !important;
+}
+
 /* ==========================================================================
    11. Mobile Responsiveness (max-width: 991px)
    ========================================================================== */
@@ -1526,6 +1619,9 @@ body.smlms-single-course-body .smlms-review-textarea {
         padding: 0 20px !important;
         gap: 0 !important;
     }
+	body.smlms-single-course-body .smlms-meta-item{
+		gap: 6px !important;
+	}
 
     body.smlms-single-course-body .smlms-hero-meta {
         gap: 18px !important;
@@ -1560,7 +1656,8 @@ body.smlms-single-course-body .smlms-review-textarea {
     }
 
     body.smlms-single-course-body .smlms-course-title {
-        font-size: 22px !important;
+        font-size: 20px !important;
+		font-weight: 500 !important;
     }
 
     body.smlms-single-course-body .smlms-curriculum-header-row {

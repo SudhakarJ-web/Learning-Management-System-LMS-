@@ -115,16 +115,16 @@ if (!empty($video_url)) {
                         <span class="dashicons dashicons-admin-users"></span> Created by <a href="#" class="smlms-hero-author-link"><?php echo esc_html(get_the_author()); ?></a>
                     </span>
                     <span class="smlms-meta-item">
-                        <span class="dashicons dashicons-groups"></span> <strong><?php echo esc_html($total_students); ?></strong> students enrolled
+                        <span class="dashicons dashicons-groups"></span> <?php echo esc_html($total_students); ?> students enrolled
                     </span>
                     <span class="smlms-meta-item">
-                        <span class="dashicons dashicons-chart-bar"></span> <strong><?php echo esc_html($level); ?></strong>
+                        <span class="dashicons dashicons-chart-bar"></span><?php echo esc_html($level); ?>
                     </span>
                     <span class="smlms-meta-item">
-                        <span class="dashicons dashicons-translation"></span> <strong><?php echo esc_html($language); ?></strong>
+                        <span class="dashicons dashicons-translation"></span><?php echo esc_html($language); ?>
                     </span>
                     <span class="smlms-meta-item">
-                        <span class="dashicons dashicons-clock"></span> <strong><?php echo esc_html($duration); ?></strong>
+                        <span class="dashicons dashicons-clock"></span> <?php echo esc_html($duration); ?>
                     </span>
 
                     <?php if ($summary['total_count'] > 0): ?>
@@ -138,7 +138,7 @@ if (!empty($video_url)) {
                                     <span class="dashicons dashicons-star-filled <?php echo esc_attr($filled); ?>"></span>
                                 <?php endfor; ?>
                             </span>
-                            <strong><?php echo esc_html($summary['avg_rating']); ?></strong> (<?php echo esc_html($summary['total_count']); ?> <?php echo ($summary['total_count'] === 1) ? 'rating' : 'ratings'; ?>)
+                            <?php echo esc_html($summary['avg_rating']); ?> (<?php echo esc_html($summary['total_count']); ?> <?php echo ($summary['total_count'] === 1) ? 'rating' : 'ratings'; ?>)
                         </span>
                     <?php endif; ?>
                 </div>
@@ -164,7 +164,7 @@ if (!empty($video_url)) {
 
                 <div class="smlms-card-actions">
                     <?php if ($has_access): ?>
-                        <a href="<?php echo esc_url($first_step_url); ?>" class="smlms-btn-start-course">RESUME COURSE</a>
+                        <a href="<?php echo esc_url($first_step_url); ?>" class="smlms-btn-start-course">START COURSE</a>
                     <?php else: ?>
                         <div class="smlms-card-price-display"><?php echo esc_html($formatted_price); ?></div>
                         <?php if ($access_type === 'free'): ?>

@@ -106,8 +106,39 @@ class SMLMS_DB {
     }
 
     /**
-     * Get Parent Course ID for a Lesson or Topic
+     * Check if a user has completed all actionable steps in a course
      */
+    public static function is_course_completed($user_id, $course_id) {
+        $user_id   = intval($user_id);
+        $course_id = intval($course_id);
+        if (!$user_id || !$course_id) return false;
+
+        // Administrators can always review for testing purposes
+        if (current_user_can('manage_options')) return true;
+
+        $hierarchy = self::get_course_hierarchy($course_id);
+        if (empty($hierarchy)) return false;
+
+        // Collect actionable leaf steps (child topics, or lessons without topics)
+        $all_leaf_step_ids = [];
+        foreach ($hierarchy as $lesson) {
+            if (!empty($lesson['topics'])) {
+                foreach ($lesson['topics'] as $topic) {
+                    $all_leaf_step_ids[] = intval($topic['id']);
+                }
+            } else {
+                $all_leaf_step_ids[] = intval($lesson['lesson_id']);
+            }
+        }
+
+        if (empty($all_leaf_step_ids)) return false;
+
+        $completed_steps = self::get_user_completed_steps($user_id, $course_id);
+        $diff            = array_diff($all_leaf_step_ids, $completed_steps);
+
+        return empty($diff);
+    }
+
     public static function get_parent_course_id($post_id) {
         $post_id = intval($post_id);
         if (!$post_id) return 0;
@@ -123,9 +154,6 @@ class SMLMS_DB {
         return 0;
     }
 
-    /**
-     * Get Child Topics for a specific Lesson
-     */
     public static function get_lesson_topics($lesson_id) {
         $lesson_id = intval($lesson_id);
         if (!$lesson_id) return [];
@@ -141,9 +169,6 @@ class SMLMS_DB {
         ]);
     }
 
-    /**
-     * Enroll a student in a course
-     */
     public static function enroll_student($user_id, $course_id) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'smlms_enrollments';
@@ -168,56 +193,6 @@ class SMLMS_DB {
         );
     }
 
-    /**
-     * Unenroll a student from a course
-     */
-    public static function unenroll_student($user_id, $course_id) {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'smlms_enrollments';
-
-        return $wpdb->delete(
-            $table_name,
-            [
-                'user_id'   => intval($user_id),
-                'course_id' => intval($course_id),
-            ],
-            ['%d', '%d']
-        );
-    }
-
-    /**
-     * Get all user IDs enrolled in a specific course
-     */
-    public static function get_enrolled_user_ids($course_id) {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'smlms_enrollments';
-
-        $results = $wpdb->get_col($wpdb->prepare(
-            "SELECT user_id FROM {$table_name} WHERE course_id = %d",
-            intval($course_id)
-        ));
-
-        return array_map('intval', $results ?: []);
-    }
-
-    /**
-     * Get all course IDs a user is enrolled in
-     */
-    public static function get_user_enrolled_courses($user_id) {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'smlms_enrollments';
-
-        $results = $wpdb->get_col($wpdb->prepare(
-            "SELECT course_id FROM {$table_name} WHERE user_id = %d",
-            intval($user_id)
-        ));
-
-        return array_map('intval', $results ?: []);
-    }
-
-    /**
-     * Check if a user is enrolled in a course
-     */
     public static function is_user_enrolled($user_id, $course_id) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'smlms_enrollments';
@@ -231,9 +206,6 @@ class SMLMS_DB {
         return intval($count) > 0;
     }
 
-    /**
-     * Get total enrolled student count for a course
-     */
     public static function get_enrolled_students_count($course_id) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'smlms_enrollments';
@@ -244,51 +216,6 @@ class SMLMS_DB {
         )));
     }
 
-    /**
-     * Get total unique enrolled students count
-     */
-    public static function get_total_students_count() {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'smlms_enrollments';
-
-        $db_count = intval($wpdb->get_var("SELECT COUNT(DISTINCT user_id) FROM {$table_name}"));
-
-        $manual_offsets = $wpdb->get_var("
-            SELECT SUM(CAST(meta_value AS UNSIGNED)) 
-            FROM {$wpdb->postmeta} 
-            WHERE meta_key = '_smlms_students_enrolled'
-        ");
-
-        return $db_count + intval($manual_offsets);
-    }
-
-    /**
-     * Get total published courses count
-     */
-    public static function get_total_courses_count() {
-        $counts = wp_count_posts('smlms_course');
-        return intval($counts->publish ?? 0);
-    }
-
-    /**
-     * Get total published lessons count
-     */
-    public static function get_total_lessons_count() {
-        $counts = wp_count_posts('smlms_lesson');
-        return intval($counts->publish ?? 0);
-    }
-
-    /**
-     * Get total published topics count
-     */
-    public static function get_total_topics_count() {
-        $counts = wp_count_posts('smlms_topic');
-        return intval($counts->publish ?? 0);
-    }
-
-    /**
-     * Get user completed step IDs for a specific course
-     */
     public static function get_user_completed_steps($user_id, $course_id) {
         $user_id   = intval($user_id);
         $course_id = intval($course_id);
@@ -298,9 +225,6 @@ class SMLMS_DB {
         return is_array($completed) ? array_map('intval', $completed) : [];
     }
 
-    /**
-     * Toggle step completion status for a user
-     */
     public static function toggle_step_completion($user_id, $course_id, $step_id) {
         $user_id   = intval($user_id);
         $course_id = intval($course_id);
@@ -322,5 +246,4 @@ class SMLMS_DB {
 
         return !$is_completed;
     }
-
 }
